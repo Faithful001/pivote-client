@@ -5,19 +5,20 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { apiClient } from "../api/client";
 import { type ApiResponse } from "../api/auth";
-import { 
-  FiCheckCircle, 
-  FiLock, 
-  FiKey, 
-  FiArrowRight, 
-  FiAlertCircle, 
-  FiX, 
-  FiHelpCircle
+import {
+  FiCheckCircle,
+  FiLock,
+  FiKey,
+  FiArrowRight,
+  FiAlertCircle,
+  FiX,
+  FiHelpCircle,
 } from "react-icons/fi";
 
 export default function Dashboard() {
   const { data: user } = useMe();
   const { data: programs, isLoading: loadingPrograms } = usePrograms();
+  console.log("programs", programs);
   const joinProgramMutation = useJoinProgram();
 
   // State for joining modal
@@ -79,7 +80,8 @@ export default function Dashboard() {
 
   // Calculations
   const totalPrograms = programs?.length || 0;
-  const joinedProgramsCount = programs?.filter((p) => p.is_joined || user?.role === "admin").length || 0;
+  const joinedProgramsCount =
+    programs?.filter((p) => p.is_joined || user?.role === "admin").length || 0;
   const activeProgramsCount = programs?.filter((p) => p.is_active).length || 0;
 
   return (
@@ -89,7 +91,9 @@ export default function Dashboard() {
         <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">
           Hello, {user?.name || "Faithful"}!
         </h1>
-        <p className="text-slate-500 text-sm">Welcome back to Pivote. Choose a program below to get started.</p>
+        <p className="text-slate-500 text-sm">
+          Welcome back to Pivote. Choose a program below to get started.
+        </p>
       </div>
 
       {/* Metrics Row */}
@@ -129,28 +133,32 @@ export default function Dashboard() {
             {programs.map((program) => {
               const isJoined = program.is_joined || user?.role === "admin";
               return (
-                <div 
-                  key={program.id} 
+                <div
+                  key={program.id}
                   className={`border rounded-2xl p-6 flex flex-col justify-between transition-all duration-200 ${
-                    isJoined 
-                      ? "border-slate-200/70 hover:border-slate-300 hover:shadow-md" 
+                    isJoined
+                      ? "border-slate-200/70 hover:border-slate-300 hover:shadow-md"
                       : "border-slate-200/50 bg-slate-50/20"
                   }`}
                 >
                   <div>
                     {/* Badge row */}
                     <div className="flex items-center justify-between mb-4">
-                      <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full ${
-                        program.is_active 
-                          ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
-                          : "bg-slate-100 text-slate-500"
-                      }`}>
+                      <span
+                        className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full ${
+                          program.is_active
+                            ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                            : "bg-slate-100 text-slate-500"
+                        }`}
+                      >
                         {program.is_active ? "Active" : "Closed"}
                       </span>
 
-                      <span className={`text-xs font-semibold flex items-center gap-1 ${
-                        isJoined ? "text-emerald-500" : "text-amber-500"
-                      }`}>
+                      <span
+                        className={`text-xs font-semibold flex items-center gap-1 ${
+                          isJoined ? "text-emerald-500" : "text-amber-500"
+                        }`}
+                      >
                         {isJoined ? (
                           <>
                             <FiCheckCircle className="w-4 h-4" /> Joined
@@ -215,12 +223,15 @@ export default function Dashboard() {
 
             <h3 className="text-xl font-bold text-[#0d1e43] mb-2">Join Program</h3>
             <p className="text-slate-400 text-sm mb-6">
-              Enter the 4-digit access code for <strong className="text-slate-600">{selectedProgramName}</strong> to join and vote.
+              Enter the 4-digit access code for{" "}
+              <strong className="text-slate-600">{selectedProgramName}</strong> to join and vote.
             </p>
 
             <form onSubmit={handleJoinSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#0d1e43] uppercase tracking-wider mb-2">Access Code</label>
+                <label className="block text-xs font-bold text-[#0d1e43] uppercase tracking-wider mb-2">
+                  Access Code
+                </label>
                 <input
                   type="text"
                   maxLength={4}
@@ -265,7 +276,8 @@ export default function Dashboard() {
 
             <h3 className="text-xl font-bold text-[#0d1e43] mb-2">Access Code Received</h3>
             <p className="text-slate-400 text-sm mb-6">
-              Here is your requested 4-digit access code for <strong className="text-slate-600">{selectedProgramName}</strong>:
+              Here is your requested 4-digit access code for{" "}
+              <strong className="text-slate-600">{selectedProgramName}</strong>:
             </p>
 
             {loadingCode ? (

@@ -42,7 +42,10 @@ export default function ProgramDashboard() {
     return (
       <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center text-slate-400">
         <p>Program not found.</p>
-        <Link to="/" className="mt-4 inline-flex items-center text-emerald-500 font-semibold hover:underline">
+        <Link
+          to="/"
+          className="mt-4 inline-flex items-center text-emerald-500 font-semibold hover:underline"
+        >
           <FiChevronLeft className="mr-1" /> Back to Programs list
         </Link>
       </div>
@@ -52,20 +55,23 @@ export default function ProgramDashboard() {
   // Stats matching screenshot metrics
   const totalCandidates = candidates ? candidates.length : 0;
   const totalVotes = voteInfo ? voteInfo.total_votes : 0;
-  
+
   // Simulated total voters enrolled in this program
-  const totalVoters = program.is_joined ? 568 : 0;
+  // const totalVoters = program.is_joined ? 568 : 0;
+
+  const totalParticipants = voteInfo?.participants_count ?? 0;
 
   // Chart bounds
-  const maxVoteCount = Math.max(...(candidates?.map(c => voteInfo?.votes_by_candidate[c.id] || 0) || []), 10) * 1.2;
+  const maxVoteCount =
+    Math.max(...(candidates?.map((c) => voteInfo?.votes_by_candidate[c.id] || 0) || []), 10) * 1.2;
   const roundedMax = Math.ceil(maxVoteCount / 30) * 30 || 240;
 
   return (
     <div className="space-y-8">
       {/* Back Button & Navigation Header */}
       <div>
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-[#0d1e43] transition mb-4"
         >
           <FiChevronLeft className="w-4 h-4 mr-1" /> Back to Programs
@@ -75,18 +81,20 @@ export default function ProgramDashboard() {
       {/* Header section matching screenshot */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">
-            {program.name} Dashboard
-          </h1>
-          <p className="text-slate-500 text-sm">{program.description || "Welcome back to Pivote"}</p>
+          <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">{program.name} Dashboard</h1>
+          <p className="text-slate-500 text-sm">
+            {program.description || "Welcome back to Pivote"}
+          </p>
         </div>
 
         <div className="flex items-center gap-6 text-sm">
           <div className="flex items-center gap-2">
             <span className="text-[#0d1e43] font-medium">Election Status:</span>
-            <span className={`text-white text-xs px-3 py-1 rounded-full font-semibold ${
-              program.is_active ? "bg-emerald-500" : "bg-slate-400"
-            }`}>
+            <span
+              className={`text-white text-xs px-3 py-1 rounded-full font-semibold ${
+                program.is_active ? "bg-emerald-500" : "bg-slate-400"
+              }`}
+            >
               {program.is_active ? "Ongoing" : "Closed"}
             </span>
           </div>
@@ -104,8 +112,8 @@ export default function ProgramDashboard() {
       {/* Stats Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm">
-          <p className="text-slate-400 text-sm font-medium mb-2">Total number of Voters</p>
-          <p className="text-3xl font-extrabold text-[#0d1e43]">{totalVoters || 568}</p>
+          <p className="text-slate-400 text-sm font-medium mb-2">Total number of Joined voters</p>
+          <p className="text-3xl font-extrabold text-[#0d1e43]">{totalParticipants}</p>
         </div>
         <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm">
           <p className="text-slate-400 text-sm font-medium mb-2">Total number of Candidates</p>
