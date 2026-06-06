@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { useMe } from "../api/auth";
-import { usePrograms, useJoinProgram } from "../api/program";
+import { usePrograms, useJoinProgram, useProgramAccessCode } from "../api/program";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { apiClient } from "../api/client";
-import { type ApiResponse } from "../api/auth";
 import {
   FiCheckCircle,
   FiLock,
@@ -27,10 +25,13 @@ export default function Dashboard() {
   const [selectedProgramName, setSelectedProgramName] = useState("");
   const [accessCode, setAccessCode] = useState("");
 
-  // State for access code modal (simulation / request)
+  // State for access code modal
   const [codeModalOpen, setCodeModalOpen] = useState(false);
-  const [requestedCode, setRequestedCode] = useState("");
-  const [loadingCode, setLoadingCode] = useState(false);
+
+  const { isLoading: loadingCode, isError: codeError } = useProgramAccessCode(
+    selectedProgramId,
+    codeModalOpen
+  );
 
   const handleOpenJoinModal = (id: string, name: string) => {
     setSelectedProgramId(id);
@@ -39,21 +40,10 @@ export default function Dashboard() {
     setJoinModalOpen(true);
   };
 
-  const handleRequestCode = async (id: string, name: string) => {
+  const handleRequestCode = (id: string, name: string) => {
+    setSelectedProgramId(id);
     setSelectedProgramName(name);
-    setLoadingCode(true);
     setCodeModalOpen(true);
-    try {
-      const response = await apiClient.get<ApiResponse<{ access_code: string }>>(
-        `/programs/${id}/access-code`
-      );
-      setRequestedCode(response.data.data.access_code);
-    } catch (err: any) {
-      toast.error("Failed to request access code");
-      setCodeModalOpen(false);
-    } finally {
-      setLoadingCode(false);
-    }
   };
 
   const handleJoinSubmit = (e: React.FormEvent) => {
@@ -274,44 +264,43 @@ export default function Dashboard() {
               <FiX className="w-5 h-5" />
             </button>
 
-            <h3 className="text-xl font-bold text-[#0d1e43] mb-2">Access Code Received</h3>
+            <h3 className="text-xl font-bold text-[#0d1e43] mb-2">Access Code Requested</h3>
             <p className="text-slate-400 text-sm mb-6">
-              Here is your requested 4-digit access code for{" "}
-              <strong className="text-slate-600">{selectedProgramName}</strong>:
+              Requesting access code for{" "}
+              <strong className="text-slate-600">{selectedProgramName}</strong>...
             </p>
 
             {loadingCode ? (
               <div className="h-20 flex items-center justify-center text-slate-400">
                 <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-emerald-500 mr-2"></div>
-                Fetching access code...
+                Sending access code to your email...
+              </div>
+            ) : codeError ? (
+              <div className="bg-red-50 border border-red-100 rounded-2xl p-4 flex items-center gap-3">
+                <FiAlertCircle className="text-red-400 w-5 h-5 flex-shrink-0" />
+                <p className="text-red-500 text-sm font-medium">
+                  Failed to request access code. Please try again.
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center justify-center gap-3">
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3">
                   <FiAlertCircle className="text-emerald-500 w-5 h-5 flex-shrink-0" />
-                  <span className="font-mono font-bold text-2xl tracking-[0.2em] text-[#0d1e43]">
-                    {requestedCode}
-                  </span>
+                  <p className="text-emerald-700 text-sm font-medium">
+                    Your access code has been sent to your email address. Check your inbox and use
+                    it to join.
+                  </p>
                 </div>
 
-                <div className="pt-4 flex gap-2">
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(requestedCode);
-                      toast.success("Access code copied to clipboard!");
-                    }}
-                    className="w-1/2 border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold py-2.5 rounded-xl text-sm transition"
-                  >
-                    Copy Code
-                  </button>
+                <div className="pt-4">
                   <button
                     onClick={() => {
                       setCodeModalOpen(false);
                       handleOpenJoinModal(selectedProgramId, selectedProgramName);
                     }}
-                    className="w-1/2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 rounded-xl text-sm transition"
+                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 rounded-xl text-sm transition"
                   >
-                    Use to Join
+                    Enter Access Code to Join
                   </button>
                 </div>
               </div>
