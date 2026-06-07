@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "./client";
 import { type ApiResponse } from "./auth";
+import { getErrorMessage } from "../lib/utils/get-error-message.util";
+import { toast } from "sonner";
 
 export interface Program {
   id: string;
@@ -78,12 +80,31 @@ export const useDeleteProgram = () => {
   });
 };
 
+export const useRequestJoinProgram = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, email }: { id: string; email: string }) => {
+      const response = await apiClient.post<ApiResponse<void>>(`/programs/${id}/request-join`, {
+        email,
+      });
+      return response.data.message;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["programs"] });
+    },
+    onError: (err) => {
+      const error = getErrorMessage(err);
+      toast.error(error);
+    },
+  });
+};
+
 export const useJoinProgram = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, access_code }: { id: string; access_code: string }) => {
+    mutationFn: async ({ id, token }: { id: string; token: string }) => {
       const response = await apiClient.post<ApiResponse<void>>(`/programs/${id}/join`, {
-        access_code,
+        token,
       });
       return response.data.data;
     },
@@ -109,15 +130,13 @@ export const useToggleProgram = () => {
   });
 };
 
-export const useProgramAccessCode = (id: string, enabled: boolean) => {
-  return useQuery<{ access_code: string }, Error>({
-    queryKey: ["programs", id, "request-code"],
-    queryFn: async () => {
-      const response = await apiClient.get<ApiResponse<{ access_code: string }>>(
-        `/programs/${id}/request-code`
-      );
-      return response.data.data;
+export const useRequestJoinLink = () => {
+  return useMutation({
+    mutationFn: async ({ id, email }: { id: string; email: string }) => {
+      const response = await apiClient.post<ApiResponse<void>>(`/programs/${id}/request-join`, {
+        email,
+      });
+      return response.data;
     },
-    enabled: enabled && !!id,
   });
 };

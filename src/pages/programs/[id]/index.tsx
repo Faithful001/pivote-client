@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "@tanstack/react-router";
-import { useProgram } from "../api/program";
-import { useCandidatesByProgram } from "../api/candidate";
-import { useProgramVotes } from "../api/vote";
+import { useProgram } from "../../../api/program";
+import { useCandidatesByProgram } from "../../../api/candidate";
+import { useProgramVotes } from "../../../api/vote";
 import { FiChevronLeft, FiCheckSquare } from "react-icons/fi";
 
 export default function ProgramDashboard() {

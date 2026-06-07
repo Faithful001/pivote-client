@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
-import { useCandidates, useCreateCandidate, useUpdateCandidate, useDeleteCandidate } from '../api/candidate';
-import { usePrograms } from '../api/program';
-import { toast } from 'sonner';
-import { FiPlus, FiEdit2, FiTrash2, FiInbox, FiX } from 'react-icons/fi';
+import React, { useState } from "react";
+import {
+  useCandidates,
+  useCreateCandidate,
+  useUpdateCandidate,
+  useDeleteCandidate,
+} from "../../../api/candidate";
+import { usePrograms } from "../../../api/program";
+import { toast } from "sonner";
+import { FiPlus, FiEdit2, FiTrash2, FiInbox, FiX } from "react-icons/fi";
 
 export default function AdminCandidates() {
   const { data: candidates, isLoading: loadingCandidates } = useCandidates();
@@ -14,12 +19,12 @@ export default function AdminCandidates() {
   // Modal / Form state
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [name, setName] = useState('');
-  const [programId, setProgramId] = useState('');
+  const [name, setName] = useState("");
+  const [programId, setProgramId] = useState("");
 
   const openCreateModal = () => {
-    setName('');
-    setProgramId(programs && programs.length > 0 ? programs[0].id : '');
+    setName("");
+    setProgramId(programs && programs.length > 0 ? programs[0].id : "");
     setEditingId(null);
     setIsOpen(true);
   };
@@ -35,7 +40,7 @@ export default function AdminCandidates() {
     e.preventDefault();
 
     if (!name || !programId) {
-      toast.error('All fields are required');
+      toast.error("All fields are required");
       return;
     }
 
@@ -44,11 +49,12 @@ export default function AdminCandidates() {
         { id: editingId, name, program_id: programId },
         {
           onSuccess: () => {
-            toast.success('Candidate updated successfully!');
+            toast.success("Candidate updated successfully!");
             setIsOpen(false);
           },
           onError: (err: any) => {
-            const errMsg = err.response?.data?.message || err.message || 'Failed to update candidate';
+            const errMsg =
+              err.response?.data?.message || err.message || "Failed to update candidate";
             toast.error(errMsg);
           },
         }
@@ -58,11 +64,12 @@ export default function AdminCandidates() {
         { name, program_id: programId },
         {
           onSuccess: () => {
-            toast.success('Candidate registered successfully!');
+            toast.success("Candidate registered successfully!");
             setIsOpen(false);
           },
           onError: (err: any) => {
-            const errMsg = err.response?.data?.message || err.message || 'Failed to create candidate';
+            const errMsg =
+              err.response?.data?.message || err.message || "Failed to create candidate";
             toast.error(errMsg);
           },
         }
@@ -71,15 +78,16 @@ export default function AdminCandidates() {
   };
 
   const handleDelete = (id: string, progId: string) => {
-    if (window.confirm('Are you sure you want to delete this candidate?')) {
+    if (window.confirm("Are you sure you want to delete this candidate?")) {
       deleteMutation.mutate(
         { id, programId: progId },
         {
           onSuccess: () => {
-            toast.success('Candidate deleted successfully!');
+            toast.success("Candidate deleted successfully!");
           },
           onError: (err: any) => {
-            const errMsg = err.response?.data?.message || err.message || 'Failed to delete candidate';
+            const errMsg =
+              err.response?.data?.message || err.message || "Failed to delete candidate";
             toast.error(errMsg);
           },
         }
@@ -92,7 +100,9 @@ export default function AdminCandidates() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">Nominate Candidates</h1>
-          <p className="text-slate-500 text-sm">Register new candidates to active election categories.</p>
+          <p className="text-slate-500 text-sm">
+            Register new candidates to active election categories.
+          </p>
         </div>
         <button
           onClick={openCreateModal}
@@ -126,7 +136,8 @@ export default function AdminCandidates() {
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
               {candidates.map((cand) => {
-                const programName = programs?.find((p) => p.id === cand.program_id)?.name || 'Unknown Program';
+                const programName =
+                  programs?.find((p) => p.id === cand.program_id)?.name || "Unknown Program";
                 return (
                   <tr key={cand.id} className="hover:bg-slate-50/50 transition">
                     <td className="px-6 py-4 font-semibold text-[#0d1e43]">{cand.name}</td>
@@ -167,12 +178,14 @@ export default function AdminCandidates() {
             </button>
 
             <h3 className="text-xl font-bold text-[#0d1e43] mb-6">
-              {editingId ? 'Edit Candidate' : 'Add Candidate'}
+              {editingId ? "Edit Candidate" : "Add Candidate"}
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Candidate Name</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Candidate Name
+                </label>
                 <input
                   type="text"
                   value={name}
@@ -183,7 +196,9 @@ export default function AdminCandidates() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Select Program</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Select Program
+                </label>
                 <select
                   value={programId}
                   onChange={(e) => setProgramId(e.target.value)}

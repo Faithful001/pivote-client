@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLogin } from "../api/auth";
+import { useLogin } from "../../api/auth";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import { FiMail, FiLock, FiCheckSquare } from "react-icons/fi";

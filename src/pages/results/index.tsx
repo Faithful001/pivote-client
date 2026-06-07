@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
-import { usePrograms } from '../api/program';
-import { useCandidatesByProgram } from '../api/candidate';
-import { useProgramVotes } from '../api/vote';
-import { FiInbox, FiAward } from 'react-icons/fi';
+import React, { useState } from "react";
+import { usePrograms } from "../../api/program";
+import { useCandidatesByProgram } from "../../api/candidate";
+import { useProgramVotes } from "../../api/vote";
+import { FiInbox, FiAward } from "react-icons/fi";
 
 export default function Results() {
   const { data: programs, isLoading: loadingPrograms } = usePrograms();
-  const [selectedProgramId, setSelectedProgramId] = useState<string>('');
+  const [selectedProgramId, setSelectedProgramId] = useState<string>("");
 
-  const { data: candidates, isLoading: loadingCandidates } = useCandidatesByProgram(selectedProgramId);
+  const { data: candidates, isLoading: loadingCandidates } =
+    useCandidatesByProgram(selectedProgramId);
   const { data: voteInfo } = useProgramVotes(selectedProgramId);
 
   React.useEffect(() => {
@@ -18,7 +19,7 @@ export default function Results() {
   }, [programs, selectedProgramId]);
 
   // Find winner
-  let winnerName = 'TBD';
+  let winnerName = "TBD";
   let winnerVotes = 0;
   if (candidates && voteInfo) {
     candidates.forEach((candidate) => {
@@ -34,7 +35,9 @@ export default function Results() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">Election Results</h1>
-        <p className="text-slate-500 text-sm">Real-time statistics and tallies for all election categories.</p>
+        <p className="text-slate-500 text-sm">
+          Real-time statistics and tallies for all election categories.
+        </p>
       </div>
 
       {loadingPrograms ? (
@@ -50,15 +53,17 @@ export default function Results() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-1 space-y-2">
-            <h3 className="text-xs font-bold text-[#0d1e43] uppercase tracking-wider px-2">Select Category</h3>
+            <h3 className="text-xs font-bold text-[#0d1e43] uppercase tracking-wider px-2">
+              Select Category
+            </h3>
             {programs.map((program) => (
               <button
                 key={program.id}
                 onClick={() => setSelectedProgramId(program.id)}
                 className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition ${
                   selectedProgramId === program.id
-                    ? 'bg-emerald-500 text-white font-semibold'
-                    : 'bg-white border border-slate-200/60 text-[#0d1e43] hover:bg-slate-50'
+                    ? "bg-emerald-500 text-white font-semibold"
+                    : "bg-white border border-slate-200/60 text-[#0d1e43] hover:bg-slate-50"
                 }`}
               >
                 {program.name}
@@ -75,7 +80,8 @@ export default function Results() {
                 <div>
                   <h4 className="font-bold text-[#0d1e43]">Current Frontrunner</h4>
                   <p className="text-sm text-emerald-800 font-medium">
-                    {winnerName} is leading with <span className="font-bold">{winnerVotes} votes</span>
+                    {winnerName} is leading with{" "}
+                    <span className="font-bold">{winnerVotes} votes</span>
                   </p>
                 </div>
               </div>
@@ -105,11 +111,13 @@ export default function Results() {
                       <div key={candidate.id} className="space-y-2">
                         <div className="flex justify-between text-sm font-medium">
                           <span className="text-[#0d1e43]">{candidate.name}</span>
-                          <span className="text-slate-500">{votes} votes ({percent}%)</span>
+                          <span className="text-slate-500">
+                            {votes} votes ({percent}%)
+                          </span>
                         </div>
                         <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                          <div 
-                            className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
+                          <div
+                            className="bg-emerald-500 h-full rounded-full transition-all duration-500"
                             style={{ width: `${percent}%` }}
                           />
                         </div>

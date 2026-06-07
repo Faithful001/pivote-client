@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useMe, useUpdateUser } from '../api/auth';
-import { toast } from 'sonner';
-import { FiUser, FiMail, FiSave, FiLock } from 'react-icons/fi';
+import React, { useState, useEffect } from "react";
+import { useMe, useUpdateUser } from "../../api/auth";
+import { toast } from "sonner";
+import { FiUser, FiMail, FiSave, FiLock } from "react-icons/fi";
 
 export default function Settings() {
   const { data: user } = useMe();
   const updateUserMutation = useUpdateUser();
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -21,7 +21,7 @@ export default function Settings() {
     e.preventDefault();
 
     if (!name || !email) {
-      toast.error('All fields are required');
+      toast.error("All fields are required");
       return;
     }
 
@@ -31,10 +31,10 @@ export default function Settings() {
       { id: user.id, name, email },
       {
         onSuccess: () => {
-          toast.success('Profile updated successfully!');
+          toast.success("Profile updated successfully!");
         },
         onError: (err: any) => {
-          const errMsg = err.response?.data?.message || err.message || 'Failed to update profile';
+          const errMsg = err.response?.data?.message || err.message || "Failed to update profile";
           toast.error(errMsg);
         },
       }
@@ -51,12 +51,14 @@ export default function Settings() {
       <div className="bg-white border border-slate-200/60 rounded-2xl p-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">User ID (ReadOnly)</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              User ID (ReadOnly)
+            </label>
             <div className="relative">
               <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
               <input
                 type="text"
-                value={user?.id || ''}
+                value={user?.id || ""}
                 readOnly
                 className="w-full bg-slate-50 border border-slate-200/60 rounded-xl py-3 pl-10 pr-4 text-slate-500 cursor-not-allowed outline-none text-sm font-mono"
               />
@@ -97,7 +99,7 @@ export default function Settings() {
             className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition flex items-center gap-2 shadow-md shadow-emerald-500/10"
           >
             <FiSave className="w-5 h-5" />
-            {updateUserMutation.isPending ? 'Saving...' : 'Save Changes'}
+            {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
           </button>
         </form>
       </div>

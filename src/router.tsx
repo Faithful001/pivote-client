@@ -1,26 +1,23 @@
-import { 
-  createRootRoute, 
-  createRoute, 
-  createRouter, 
-  Outlet 
-} from '@tanstack/react-router';
-import { Toaster } from 'sonner';
+import { createRootRoute, createRoute, createRouter, Outlet } from "@tanstack/react-router";
+import { Toaster } from "sonner";
 
 // Component imports
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Verify from './pages/Verify';
-import Dashboard from './pages/Dashboard';
-import Vote from './pages/Vote';
-import Results from './pages/Results';
-import Guidelines from './pages/Guidelines';
-import Settings from './pages/Settings';
-import AdminPrograms from './pages/AdminPrograms';
-import AdminCandidates from './pages/AdminCandidates';
-import ProgramDashboard from './pages/ProgramDashboard';
+import Login from "./pages/login";
+import Register from "./pages/register";
+import Verify from "./pages/verify";
+import Dashboard from "./pages";
+import Vote from "./pages/vote";
+import Results from "./pages/results";
+import Guidelines from "./pages/guidelines";
+import Settings from "./pages/settings";
+import AdminPrograms from "./pages/admin/programs";
+import AdminCandidates from "./pages/admin/candidates";
+import ProgramDashboard from "./pages/programs/[id]";
 
-import Layout from './components/Layout';
-import ProtectedRoute from './components/ProtectedRoute';
+import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
+import JoinProgram from "./pages/programs/[id]/join";
+import RequestJoinProgram from "./pages/programs/[id]/request-join";
 
 // 1. Define Root Route
 const rootRoute = createRootRoute({
@@ -35,26 +32,46 @@ const rootRoute = createRootRoute({
 // 2. Define Public Routes
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/login',
+  path: "/login",
   component: Login,
 });
 
 const registerRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/register',
+  path: "/register",
   component: Register,
 });
 
 const verifyRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/verify',
+  path: "/verify",
   component: Verify,
+});
+
+const requestJoinProgramRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/programs/$programId/request-join",
+  component: RequestJoinProgram,
+  validateSearch: (search: Record<string, unknown>) => ({
+    email: typeof search.email === "string" ? search.email : undefined,
+    name: typeof search.name === "string" ? search.name : undefined,
+  }),
+});
+const joinProgramRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/programs/$programId/join",
+  component: JoinProgram,
+  validateSearch: (search: Record<string, unknown>) => ({
+    token: typeof search.token === "string" ? search.token : undefined,
+    email: typeof search.email === "string" ? search.email : undefined,
+    name: typeof search.name === "string" ? search.name : undefined,
+  }),
 });
 
 // 3. Define Protected/Dashboard Routes
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/',
+  path: "/",
   component: () => (
     <ProtectedRoute>
       <Layout>
@@ -66,7 +83,7 @@ const indexRoute = createRoute({
 
 const voteRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/vote',
+  path: "/vote",
   component: () => (
     <ProtectedRoute>
       <Layout>
@@ -78,7 +95,7 @@ const voteRoute = createRoute({
 
 const resultsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/results',
+  path: "/results",
   component: () => (
     <ProtectedRoute>
       <Layout>
@@ -90,7 +107,7 @@ const resultsRoute = createRoute({
 
 const guidelinesRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/guidelines',
+  path: "/guidelines",
   component: () => (
     <ProtectedRoute>
       <Layout>
@@ -102,7 +119,7 @@ const guidelinesRoute = createRoute({
 
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/settings',
+  path: "/settings",
   component: () => (
     <ProtectedRoute>
       <Layout>
@@ -115,7 +132,7 @@ const settingsRoute = createRoute({
 // Admin-only Routes
 const adminProgramsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/admin/programs',
+  path: "/admin/programs",
   component: () => (
     <ProtectedRoute requireAdmin={true}>
       <Layout>
@@ -127,7 +144,7 @@ const adminProgramsRoute = createRoute({
 
 const adminCandidatesRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/admin/candidates',
+  path: "/admin/candidates",
   component: () => (
     <ProtectedRoute requireAdmin={true}>
       <Layout>
@@ -139,7 +156,7 @@ const adminCandidatesRoute = createRoute({
 
 const programDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/programs/$programId',
+  path: "/programs/$programId",
   component: () => (
     <ProtectedRoute>
       <Layout>
@@ -155,6 +172,8 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   registerRoute,
   verifyRoute,
+  requestJoinProgramRoute,
+  joinProgramRoute,
   voteRoute,
   resultsRoute,
   guidelinesRoute,
@@ -168,7 +187,7 @@ const routeTree = rootRoute.addChildren([
 export const router = createRouter({ routeTree });
 
 // Register types for TypeScript support
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
   }

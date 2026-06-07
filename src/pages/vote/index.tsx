@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { useMe } from '../api/auth';
-import { usePrograms } from '../api/program';
-import { useCandidatesByProgram } from '../api/candidate';
-import { useProgramVotes, useToggleVote } from '../api/vote';
-import { toast } from 'sonner';
-import { FiCheck, FiInbox, FiLock } from 'react-icons/fi';
+import React, { useState } from "react";
+import { useMe } from "../../api/auth";
+import { usePrograms } from "../../api/program";
+import { useCandidatesByProgram } from "../../api/candidate";
+import { useProgramVotes, useToggleVote } from "../../api/vote";
+import { toast } from "sonner";
+import { FiCheck, FiInbox, FiLock } from "react-icons/fi";
 
 export default function Vote() {
   const { data: user } = useMe();
   const { data: programs, isLoading: loadingPrograms } = usePrograms();
-  const [selectedProgramId, setSelectedProgramId] = useState<string>('');
+  const [selectedProgramId, setSelectedProgramId] = useState<string>("");
 
   // Filter programs to only those the user has joined (or all if admin)
   const joinedPrograms = React.useMemo(() => {
     if (!programs) return [];
-    return programs.filter((p) => p.is_joined || user?.role === 'admin');
+    return programs.filter((p) => p.is_joined || user?.role === "admin");
   }, [programs, user]);
 
   // Selected program info
@@ -23,7 +23,8 @@ export default function Vote() {
   }, [joinedPrograms, selectedProgramId]);
 
   // Fetch candidates and votes of selected program
-  const { data: candidates, isLoading: loadingCandidates } = useCandidatesByProgram(selectedProgramId);
+  const { data: candidates, isLoading: loadingCandidates } =
+    useCandidatesByProgram(selectedProgramId);
   const { data: voteInfo } = useProgramVotes(selectedProgramId);
   const toggleVoteMutation = useToggleVote();
 
@@ -36,17 +37,17 @@ export default function Vote() {
 
   const handleVote = (candidateId: string) => {
     if (!activeProgram?.is_active) {
-      toast.error('Voting is closed for this program');
+      toast.error("Voting is closed for this program");
       return;
     }
     toggleVoteMutation.mutate(
       { candidate_id: candidateId, program_id: selectedProgramId },
       {
         onSuccess: () => {
-          toast.success('Vote cast successfully!');
+          toast.success("Vote cast successfully!");
         },
         onError: (err: any) => {
-          const errMsg = err.response?.data?.message || err.message || 'Failed to submit vote';
+          const errMsg = err.response?.data?.message || err.message || "Failed to submit vote";
           toast.error(errMsg);
         },
       }
@@ -60,7 +61,9 @@ export default function Vote() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">Cast Your Vote</h1>
-        <p className="text-slate-500 text-sm">Select a joined program to view candidates and place your vote.</p>
+        <p className="text-slate-500 text-sm">
+          Select a joined program to view candidates and place your vote.
+        </p>
       </div>
 
       {loadingPrograms ? (
@@ -72,13 +75,17 @@ export default function Vote() {
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center text-slate-400">
           <FiInbox className="w-12 h-12 mx-auto mb-4 text-slate-300" />
           <p className="mb-2">You haven't joined any voting programs yet.</p>
-          <p className="text-sm text-slate-500">Go to the Dashboard to request access codes and join programs.</p>
+          <p className="text-sm text-slate-500">
+            Go to the Dashboard to request access codes and join programs.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Categories Sidebar List */}
           <div className="lg:col-span-1 space-y-3">
-            <h3 className="text-xs font-bold text-[#0d1e43] uppercase tracking-wider px-2">Joined Programs</h3>
+            <h3 className="text-xs font-bold text-[#0d1e43] uppercase tracking-wider px-2">
+              Joined Programs
+            </h3>
             <div className="space-y-1">
               {joinedPrograms.map((program) => (
                 <button
@@ -86,15 +93,19 @@ export default function Vote() {
                   onClick={() => setSelectedProgramId(program.id)}
                   className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition flex items-center justify-between ${
                     selectedProgramId === program.id
-                      ? 'bg-emerald-500 text-white font-semibold shadow-sm'
-                      : 'bg-white border border-slate-200/60 text-[#0d1e43] hover:bg-slate-50'
+                      ? "bg-emerald-500 text-white font-semibold shadow-sm"
+                      : "bg-white border border-slate-200/60 text-[#0d1e43] hover:bg-slate-50"
                   }`}
                 >
                   <span className="truncate mr-2">{program.name}</span>
                   {!program.is_active && (
-                    <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-full ${
-                      selectedProgramId === program.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
-                    }`}>
+                    <span
+                      className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-full ${
+                        selectedProgramId === program.id
+                          ? "bg-white/20 text-white"
+                          : "bg-slate-100 text-slate-500"
+                      }`}
+                    >
                       Closed
                     </span>
                   )}
@@ -140,26 +151,35 @@ export default function Vote() {
                   {candidates.map((candidate) => {
                     const voteCount = voteInfo?.votes_by_candidate[candidate.id] || 0;
                     const isVoted = userVotedCandidateId === candidate.id;
-                    const isDisableVote = hasVotedInProgram || !activeProgram?.is_active || toggleVoteMutation.isPending;
+                    const isDisableVote =
+                      hasVotedInProgram ||
+                      !activeProgram?.is_active ||
+                      toggleVoteMutation.isPending;
 
                     return (
-                      <div 
+                      <div
                         key={candidate.id}
                         className={`border rounded-2xl p-6 flex flex-col justify-between transition duration-200 ${
-                          isVoted 
-                            ? 'border-emerald-500 bg-emerald-50/10' 
-                            : 'border-slate-200/70 hover:border-slate-300'
+                          isVoted
+                            ? "border-emerald-500 bg-emerald-50/10"
+                            : "border-slate-200/70 hover:border-slate-300"
                         }`}
                       >
                         <div className="flex items-center gap-4 mb-4">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
-                            isVoted ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'
-                          }`}>
+                          <div
+                            className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
+                              isVoted
+                                ? "bg-emerald-100 text-emerald-600"
+                                : "bg-slate-100 text-slate-400"
+                            }`}
+                          >
                             {candidate.name.charAt(0)}
                           </div>
                           <div>
                             <h4 className="font-bold text-[#0d1e43]">{candidate.name}</h4>
-                            <p className="text-xs text-slate-400 font-mono mt-0.5">{voteCount} Votes</p>
+                            <p className="text-xs text-slate-400 font-mono mt-0.5">
+                              {voteCount} Votes
+                            </p>
                           </div>
                         </div>
 
@@ -173,8 +193,8 @@ export default function Vote() {
                             disabled={isDisableVote}
                             className={`w-full py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 ${
                               isDisableVote
-                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200/50'
-                                : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm'
+                                ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200/50"
+                                : "bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm"
                             }`}
                           >
                             {!activeProgram?.is_active ? (
@@ -182,9 +202,9 @@ export default function Vote() {
                                 <FiLock className="w-4 h-4" /> Locked
                               </>
                             ) : hasVotedInProgram ? (
-                              'Vote'
+                              "Vote"
                             ) : (
-                              'Cast Vote'
+                              "Cast Vote"
                             )}
                           </button>
                         )}
