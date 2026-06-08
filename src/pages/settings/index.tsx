@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useMe, useUpdateUser } from "../../api/auth";
 import { toast } from "sonner";
-import { FiUser, FiMail, FiSave, FiLock } from "react-icons/fi";
+import { FiUser, FiMail, FiSave } from "react-icons/fi";
 
 export default function Settings() {
   const { data: user } = useMe();
@@ -28,7 +28,7 @@ export default function Settings() {
     if (!user) return;
 
     updateUserMutation.mutate(
-      { id: user.id, name, email },
+      { id: user.id, name },
       {
         onSuccess: () => {
           toast.success("Profile updated successfully!");
@@ -51,21 +51,6 @@ export default function Settings() {
       <div className="bg-white border border-slate-200/60 rounded-2xl p-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              User ID (ReadOnly)
-            </label>
-            <div className="relative">
-              <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <input
-                type="text"
-                value={user?.id || ""}
-                readOnly
-                className="w-full bg-slate-50 border border-slate-200/60 rounded-xl py-3 pl-10 pr-4 text-slate-500 cursor-not-allowed outline-none text-sm font-mono"
-              />
-            </div>
-          </div>
-
-          <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
             <div className="relative">
               <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -87,8 +72,9 @@ export default function Settings() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                readOnly
                 placeholder="you@domain.com"
-                className="w-full bg-white border border-slate-200/70 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl py-3 pl-10 pr-4 text-[#0d1e43] placeholder-slate-400 transition outline-none"
+                className="opacity-60 cursor-not-allowed w-full bg-white border border-slate-200/70 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl py-3 pl-10 pr-4 text-[#0d1e43] placeholder-slate-400 transition outline-none"
               />
             </div>
           </div>

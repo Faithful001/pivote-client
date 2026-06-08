@@ -1,16 +1,17 @@
-import React from 'react';
-import { Link, useNavigate, useLocation } from '@tanstack/react-router';
-import { useMe } from '../api/auth';
-import { 
-  FiGrid, 
-  FiCheckSquare, 
-  FiBarChart2, 
-  FiBookOpen, 
-  FiSettings, 
+import React from "react";
+import { Link, useNavigate, useLocation } from "@tanstack/react-router";
+import { useMe } from "../api/auth";
+import {
+  FiGrid,
+  FiCheckSquare,
+  FiBarChart2,
+  FiBookOpen,
+  FiSettings,
   FiLogOut,
-  FiUser
-} from 'react-icons/fi';
-import { toast } from 'sonner';
+  FiUsers,
+} from "react-icons/fi";
+import { toast } from "sonner";
+import { LiaVoteYeaSolid } from "react-icons/lia";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -22,24 +23,24 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    toast.success('Logged out successfully');
-    navigate({ to: '/login' });
+    localStorage.removeItem("token");
+    toast.success("Logged out successfully");
+    navigate({ to: "/login" });
   };
 
   const navItems = [
-    { label: 'Dashboard', path: '/', icon: FiGrid },
-    { label: 'Vote', path: '/vote', icon: FiCheckSquare },
-    { label: 'Results', path: '/results', icon: FiBarChart2 },
-    { label: 'Voters Guidelines', path: '/guidelines', icon: FiBookOpen },
-    { label: 'Settings', path: '/settings', icon: FiSettings },
+    { label: "Dashboard", path: "/", icon: FiGrid },
+    { label: "Vote", path: "/vote", icon: FiCheckSquare },
+    { label: "Results", path: "/results", icon: FiBarChart2 },
+    { label: "Voters Guidelines", path: "/guidelines", icon: FiBookOpen },
+    { label: "Settings", path: "/settings", icon: FiSettings },
   ];
 
   // Add Admin-only links if user is admin
-  if (user?.role === 'admin') {
+  if (user?.role === "admin") {
     navItems.push(
-      { label: 'Admin Programs', path: '/admin/programs', icon: FiSettings },
-      { label: 'Admin Candidates', path: '/admin/candidates', icon: FiUser }
+      { label: "Admin Programs", path: "/admin/programs", icon: LiaVoteYeaSolid },
+      { label: "Admin Candidates", path: "/admin/candidates", icon: FiUsers }
     );
   }
 
@@ -72,10 +73,10 @@ export default function Layout({ children }: LayoutProps) {
                 <Link
                   key={item.label}
                   to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition duration-200 ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition duration-200 ${
                     isActive
-                      ? 'bg-emerald-500 text-white font-semibold shadow-lg shadow-emerald-500/10'
-                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                      ? "bg-emerald-500 text-white font-semibold shadow-lg shadow-emerald-500/10"
+                      : "text-slate-300 hover:bg-white/5 hover:text-white"
                   }`}
                 >
                   <item.icon className="w-5 h-5" />
@@ -100,9 +101,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Main Content Area */}
       <main className="flex-1 min-h-screen pl-64 bg-[#f8fafc]">
-        <div className="p-10 max-w-7xl mx-auto">
-          {children}
-        </div>
+        <div className="p-10 max-w-7xl mx-auto">{children}</div>
       </main>
     </div>
   );

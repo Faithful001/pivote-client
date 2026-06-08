@@ -81,8 +81,8 @@ export const useVerifyAccount = () => {
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, name, email }: { id: string; name: string; email: string }) => {
-      const response = await apiClient.put<ApiResponse<User>>(`/users/${id}`, { name, email });
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      const response = await apiClient.put<ApiResponse<User>>(`/users/${id}`, { name });
       return response.data.data;
     },
     onSuccess: (data) => {

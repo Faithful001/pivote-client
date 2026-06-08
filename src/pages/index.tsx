@@ -60,7 +60,7 @@ export default function Dashboard() {
   };
 
   // Calculations
-  const totalPrograms = programs?.length || 0;
+  // const totalPrograms = programs?.length || 0;
   const joinedProgramsCount =
     programs?.filter((p) => p.is_joined || user?.role === "admin").length || 0;
   const activeProgramsCount = programs?.filter((p) => p.is_active).length || 0;
@@ -78,11 +78,7 @@ export default function Dashboard() {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm">
-          <p className="text-slate-400 text-sm font-medium mb-2">Total Programs</p>
-          <p className="text-3xl font-extrabold text-[#0d1e43]">{totalPrograms}</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm">
           <p className="text-slate-400 text-sm font-medium mb-2">Joined Programs</p>
           <p className="text-3xl font-extrabold text-[#0d1e43]">{joinedProgramsCount}</p>
@@ -204,8 +200,8 @@ export default function Dashboard() {
                 <h3 className="text-xl font-bold text-[#0d1e43]">Check your inbox</h3>
                 <p className="text-slate-400 text-sm leading-relaxed">
                   A secure join link for{" "}
-                  <strong className="text-slate-600">{selectedProgramName}</strong> has been
-                  sent to <strong className="text-slate-600">{emailInput}</strong>.
+                  <strong className="text-slate-600">{selectedProgramName}</strong> has been sent to{" "}
+                  <strong className="text-slate-600">{emailInput}</strong>.
                 </p>
                 <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-start gap-2 text-left">
                   <FiAlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />

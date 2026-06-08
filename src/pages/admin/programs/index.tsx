@@ -8,18 +8,12 @@ import {
   type Program,
 } from "../../../api/program";
 import { toast } from "sonner";
-import {
-  FiPlus,
-  FiEdit2,
-  FiTrash2,
-  FiInbox,
-  FiCheck,
-  FiLock,
-  FiShare2,
-  FiCopy,
-} from "react-icons/fi";
+import { FiPlus, FiEdit2, FiTrash2, FiInbox, FiShare2, FiCopy } from "react-icons/fi";
 import { TiTick } from "react-icons/ti";
 import Modal from "../../../components/modals";
+import { Loader2 } from "lucide-react";
+import { Switch } from "@radix-ui/themes";
+// import * as Switch from "@radix-ui/react-switch";
 
 export default function AdminPrograms() {
   const { data: programs, isLoading } = usePrograms();
@@ -32,6 +26,7 @@ export default function AdminPrograms() {
   const [isCopied, setIsCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [programId, setProgramId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -60,9 +55,14 @@ export default function AdminPrograms() {
 
   const openShareModal = (prog: Program) => {
     setName(prog.name);
-    setDescription(prog.description);
     setProgramId(prog.id);
     setIsShareModalOpen(true);
+  };
+
+  const openDeleteModal = (prog: Program) => {
+    setName(prog.name);
+    setProgramId(prog.id);
+    setIsDeleteModalOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -104,18 +104,20 @@ export default function AdminPrograms() {
     }
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this program?")) {
-      deleteMutation.mutate(id, {
-        onSuccess: () => {
-          toast.success("Program deleted successfully!");
-        },
-        onError: (err: any) => {
-          const errMsg = err.response?.data?.message || err.message || "Failed to delete program";
-          toast.error(errMsg);
-        },
-      });
+  const handleDelete = (id: string | null) => {
+    if (!id) {
+      toast.error("Program ID is required");
+      return;
     }
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success("Program deleted successfully!");
+      },
+      onError: (err: any) => {
+        const errMsg = err.response?.data?.message || err.message || "Failed to delete program";
+        toast.error(errMsg);
+      },
+    });
   };
 
   const handleToggle = (id: string, currentStatus: boolean) => {
@@ -166,7 +168,6 @@ export default function AdminPrograms() {
               <tr className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-[#0d1e43] uppercase tracking-wider">
                 <th className="px-6 py-4">Name</th>
                 <th className="px-6 py-4">Description</th>
-                <th className="px-6 py-4">Access Code</th>
                 <th className="px-6 py-4">Voting Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -178,29 +179,33 @@ export default function AdminPrograms() {
                   <td className="px-6 py-4 text-slate-500 max-w-xs truncate">
                     {program.description || "-"}
                   </td>
-                  <td className="px-6 py-4 font-mono font-bold text-slate-700">
-                    {program.access_code}
-                  </td>
                   <td className="px-6 py-4">
-                    <button
-                      onClick={() => handleToggle(program.id, program.is_active)}
-                      disabled={toggleMutation.isPending}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border transition flex items-center gap-1.5 ${
-                        program.is_active
-                          ? "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100/50"
-                          : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100/50"
-                      }`}
-                    >
-                      {program.is_active ? (
-                        <>
-                          <FiCheck className="w-3.5 h-3.5" /> Voting On
-                        </>
-                      ) : (
-                        <>
-                          <FiLock className="w-3.5 h-3.5" /> Voting Off
-                        </>
-                      )}
-                    </button>
+                    <Switch defaultChecked />
+                    {/* <div className="flex items-center gap-2">
+                      <Switch.Root
+                        checked={program.is_active}
+                        onCheckedChange={(checked) => handleToggle(program.id, checked)}
+                        disabled={toggleMutation.isPending}
+                        className={`
+      w-11 h-6 rounded-full transition
+      data-[state=checked]:bg-emerald-500
+      data-[state=unchecked]:bg-slate-300
+    `}
+                      >
+                        <Switch.Thumb
+                          className={`
+        block w-5 h-5 bg-white rounded-full shadow
+        transition-transform
+        translate-x-0
+        data-[state=checked]:translate-x-5
+      `}
+                        />
+                      </Switch.Root>
+
+                      <span className="text-xs font-bold text-slate-600">
+                        {program.is_active ? "Voting On" : "Voting Off"}
+                      </span>
+                    </div> */}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="inline-flex items-center gap-2">
@@ -217,7 +222,7 @@ export default function AdminPrograms() {
                         <FiShare2 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(program.id)}
+                        onClick={() => openDeleteModal(program)}
                         className="p-2 text-slate-500 hover:text-red-500 hover:bg-slate-100 rounded-lg transition"
                       >
                         <FiTrash2 className="w-4 h-4" />
@@ -249,6 +254,30 @@ export default function AdminPrograms() {
           </button>
         </div>
       </Modal>
+
+      <Modal open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen} title={"Delete Program"}>
+        <div className="flex flex-col gap-2">
+          <p className="text-sm">{`Are you sure you want to delete this program?`}</p>
+          <div className="flex gap-4 pt-2">
+            <button
+              type="button"
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="w-1/2 border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold py-3 rounded-xl transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDelete(programId)}
+              disabled={deleteMutation.isPending}
+              className="w-1/2 bg-red-500 flex items-center justify-center hover:bg-red-600 disabled:bg-red-700 text-white font-semibold py-3 rounded-xl transition"
+            >
+              {deleteMutation.isPending ? <Loader2 className="animate-spin w-5 h-5" /> : "Delete"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       <Modal
         open={isOpen}
         onOpenChange={setIsOpen}
