@@ -31,7 +31,6 @@ export default function Verify() {
             toast.success("Account verified successfully!");
 
             if (isFromInvite) {
-              // auto-trigger join request — user came from a program invite
               requestJoinMutation.mutate(
                 { id: search.program_id, email },
                 {
@@ -40,8 +39,6 @@ export default function Verify() {
                     navigate({ to: "/login" });
                   },
                   onError: () => {
-                    // join request failed but account is verified — still send to login
-                    // they can manually request a join link later
                     navigate({ to: "/login" });
                   },
                 }

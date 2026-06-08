@@ -11,7 +11,6 @@ export default function Vote() {
   const { data: programs, isLoading: loadingPrograms } = usePrograms();
   const [selectedProgramId, setSelectedProgramId] = useState<string>("");
 
-  // Filter programs to only those the user has joined (or all if admin)
   const joinedPrograms = React.useMemo(() => {
     if (!programs) return [];
     return programs.filter((p) => p.is_joined || user?.role === "admin");

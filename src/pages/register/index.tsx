@@ -12,7 +12,6 @@ export default function Register() {
   const registerMutation = useRegister();
   const navigate = useNavigate();
 
-  // read program context from query params (set by register_to_join email link)
   const search = useSearch({ strict: false }) as {
     email?: string;
     program_id?: string;
@@ -40,9 +39,6 @@ export default function Register() {
         onSuccess: (data) => {
           if (data.success) {
             toast.success("Registration successful! Check your email for OTP.");
-
-            // if user came from a program invite, auto-request join after verifying
-            // we pass program context through to the verify page
             navigate({
               to: "/verify",
               search: {
@@ -118,7 +114,6 @@ export default function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@domain.com"
-                // lock email if it came from invite link
                 readOnly={!!search.email}
                 className={`w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl py-3 pl-10 pr-4 text-slate-100 placeholder-slate-600 transition outline-none ${
                   search.email ? "opacity-60 cursor-not-allowed" : ""

@@ -12,7 +12,7 @@ export default function ProgramDashboard() {
   const { data: candidates, isLoading: loadingCandidates } = useCandidatesByProgram(programId);
   const { data: voteInfo, isLoading: loadingVotes } = useProgramVotes(programId);
 
-  // Countdown timer state
+  // Countdown timer state. don't forget refactor to use SSE. CRITICAL!!!!!
   const [timeLeft, setTimeLeft] = useState(9950); // 2 hours, 45 mins, 50 seconds in seconds
 
   useEffect(() => {
