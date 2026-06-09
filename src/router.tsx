@@ -18,6 +18,9 @@ import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import JoinProgram from "./pages/programs/[id]/join";
 import RequestJoinProgram from "./pages/programs/[id]/request-join";
+import AdminCreateProgram from "./pages/admin/programs/create";
+// import AdminEditProgram from "./pages/admin/programs/[id]/edit";
+import AdminViewProgram from "./pages/admin/programs/[id]/view";
 
 // 1. Define Root Route
 const rootRoute = createRootRoute({
@@ -142,6 +145,30 @@ const adminProgramsRoute = createRoute({
   ),
 });
 
+const adminCreateProgramRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/programs/create",
+  component: () => (
+    <ProtectedRoute requireAdmin={true}>
+      <Layout>
+        <AdminCreateProgram />
+      </Layout>
+    </ProtectedRoute>
+  ),
+});
+
+const adminViewProgramRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/programs/$programId/view",
+  component: () => (
+    <ProtectedRoute requireAdmin={true}>
+      <Layout>
+        <AdminViewProgram />
+      </Layout>
+    </ProtectedRoute>
+  ),
+});
+
 const adminCandidatesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/admin/candidates",
@@ -179,6 +206,8 @@ const routeTree = rootRoute.addChildren([
   guidelinesRoute,
   settingsRoute,
   adminProgramsRoute,
+  adminCreateProgramRoute,
+  adminViewProgramRoute,
   adminCandidatesRoute,
   programDashboardRoute,
 ]);

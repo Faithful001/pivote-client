@@ -1,135 +1,66 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   usePrograms,
-  useCreateProgram,
-  useUpdateProgram,
   useDeleteProgram,
   useToggleProgram,
   type Program,
 } from "../../../api/program";
 import { toast } from "sonner";
-import { FiPlus, FiEdit2, FiTrash2, FiInbox, FiShare2, FiCopy } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiInbox, FiShare2, FiCopy, FiExternalLink } from "react-icons/fi";
 import { TiTick } from "react-icons/ti";
 import Modal from "../../../components/modals";
 import { Loader2 } from "lucide-react";
-import { Switch } from "@radix-ui/themes";
-// import * as Switch from "@radix-ui/react-switch";
+import * as Switch from "@radix-ui/react-switch";
+import { useNavigate } from "@tanstack/react-router";
 
 export default function AdminPrograms() {
   const { data: programs, isLoading } = usePrograms();
-  const createMutation = useCreateProgram();
-  const updateMutation = useUpdateProgram();
   const deleteMutation = useDeleteProgram();
   const toggleMutation = useToggleProgram();
+  const navigate = useNavigate();
 
-  // Modal / Form state
   const [isCopied, setIsCopied] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [programId, setProgramId] = useState<string | null>(null);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
 
   const handleCopy = (text: string) => {
     setIsCopied(true);
     navigator.clipboard.writeText(text);
-    setTimeout(() => {
-      setIsCopied(false);
-    }, 1000);
-  };
-
-  const openCreateModal = () => {
-    setName("");
-    setDescription("");
-    setProgramId(null);
-    setIsOpen(true);
-  };
-
-  const openEditModal = (prog: Program) => {
-    setName(prog.name);
-    setDescription(prog.description);
-    setProgramId(prog.id);
-    setIsOpen(true);
+    setTimeout(() => setIsCopied(false), 1000);
   };
 
   const openShareModal = (prog: Program) => {
-    setName(prog.name);
-    setProgramId(prog.id);
+    setSelectedProgram(prog);
     setIsShareModalOpen(true);
   };
 
   const openDeleteModal = (prog: Program) => {
-    setName(prog.name);
-    setProgramId(prog.id);
+    setSelectedProgram(prog);
     setIsDeleteModalOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!name) {
-      toast.error("Program Name is required");
-      return;
-    }
-
-    if (programId) {
-      updateMutation.mutate(
-        { id: programId, name, description },
-        {
-          onSuccess: () => {
-            toast.success("Program updated successfully!");
-            setIsOpen(false);
-          },
-          onError: (err: any) => {
-            const errMsg = err.response?.data?.message || err.message || "Failed to update program";
-            toast.error(errMsg);
-          },
-        }
-      );
-    } else {
-      createMutation.mutate(
-        { name, description },
-        {
-          onSuccess: () => {
-            toast.success("Program created successfully!");
-            setIsOpen(false);
-          },
-          onError: (err: any) => {
-            const errMsg = err.response?.data?.message || err.message || "Failed to create program";
-            toast.error(errMsg);
-          },
-        }
-      );
-    }
-  };
-
-  const handleDelete = (id: string | null) => {
-    if (!id) {
-      toast.error("Program ID is required");
-      return;
-    }
-    deleteMutation.mutate(id, {
+  const handleDelete = () => {
+    if (!selectedProgram) return;
+    deleteMutation.mutate(selectedProgram.id, {
       onSuccess: () => {
         toast.success("Program deleted successfully!");
+        setIsDeleteModalOpen(false);
+        setSelectedProgram(null);
       },
       onError: (err: any) => {
-        const errMsg = err.response?.data?.message || err.message || "Failed to delete program";
-        toast.error(errMsg);
+        toast.error(err.response?.data?.message || err.message || "Failed to delete program");
       },
     });
   };
 
-  const handleToggle = (id: string, currentStatus: boolean) => {
+  const handleToggle = (id: string, checked: boolean) => {
     toggleMutation.mutate(
-      { id, is_active: !currentStatus },
+      { id, is_active: checked },
       {
-        onSuccess: () => {
-          toast.success("Voting status updated successfully!");
-        },
+        onSuccess: (data) => toast.success(data.message),
         onError: (err: any) => {
-          const errMsg = err.response?.data?.message || err.message || "Failed to update status";
-          toast.error(errMsg);
+          toast.error(err.response?.data?.message || err.message || "Failed to update status");
         },
       }
     );
@@ -137,13 +68,14 @@ export default function AdminPrograms() {
 
   return (
     <div className="space-y-8">
+      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">Manage Programs</h1>
           <p className="text-slate-500 text-sm">Create and organize election categories.</p>
         </div>
         <button
-          onClick={openCreateModal}
+          onClick={() => navigate({ to: "/admin/programs/create" })}
           className="bg-[#10b981] hover:bg-emerald-600 text-white font-semibold py-2.5 px-5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-emerald-500/10"
         >
           <FiPlus className="w-5 h-5" />
@@ -151,9 +83,10 @@ export default function AdminPrograms() {
         </button>
       </div>
 
+      {/* Table */}
       {isLoading ? (
         <div className="h-64 flex items-center justify-center text-slate-400">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-emerald-500 mr-2"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-emerald-500 mr-2" />
           Loading programs...
         </div>
       ) : !programs || programs.length === 0 ? (
@@ -180,50 +113,45 @@ export default function AdminPrograms() {
                     {program.description || "-"}
                   </td>
                   <td className="px-6 py-4">
-                    <Switch defaultChecked />
-                    {/* <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <Switch.Root
                         checked={program.is_active}
                         onCheckedChange={(checked) => handleToggle(program.id, checked)}
                         disabled={toggleMutation.isPending}
-                        className={`
-      w-11 h-6 rounded-full transition
-      data-[state=checked]:bg-emerald-500
-      data-[state=unchecked]:bg-slate-300
-    `}
+                        className="w-11 h-6 rounded-full transition data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-slate-300"
                       >
-                        <Switch.Thumb
-                          className={`
-        block w-5 h-5 bg-white rounded-full shadow
-        transition-transform
-        translate-x-0
-        data-[state=checked]:translate-x-5
-      `}
-                        />
+                        <Switch.Thumb className="block w-5 h-5 bg-white rounded-full shadow transition-transform translate-x-0 data-[state=checked]:translate-x-5" />
                       </Switch.Root>
-
                       <span className="text-xs font-bold text-slate-600">
                         {program.is_active ? "Voting On" : "Voting Off"}
                       </span>
-                    </div> */}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="inline-flex items-center gap-2">
                       <button
-                        onClick={() => openEditModal(program)}
+                        onClick={() =>
+                          navigate({
+                            to: "/admin/programs/$programId/view",
+                            params: { programId: program.id },
+                          })
+                        }
                         className="p-2 text-slate-500 hover:text-emerald-500 hover:bg-slate-100 rounded-lg transition"
+                        title="Edit program"
                       >
-                        <FiEdit2 className="w-4 h-4" />
+                        <FiExternalLink className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => openShareModal(program)}
                         className="p-2 text-slate-500 hover:text-blue-500 hover:bg-slate-100 rounded-lg transition"
+                        title="Share join link"
                       >
                         <FiShare2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => openDeleteModal(program)}
                         className="p-2 text-slate-500 hover:text-red-500 hover:bg-slate-100 rounded-lg transition"
+                        title="Delete program"
                       >
                         <FiTrash2 className="w-4 h-4" />
                       </button>
@@ -236,15 +164,18 @@ export default function AdminPrograms() {
         </div>
       )}
 
-      <Modal open={isShareModalOpen} onOpenChange={setIsShareModalOpen} title={"Share Program"}>
+      {/* Share Modal */}
+      <Modal open={isShareModalOpen} onOpenChange={setIsShareModalOpen} title="Share Program">
         <div className="flex flex-col gap-2">
           <div className="rounded-md bg-gray-100 p-2">
-            <p className="text-sm">{`${window.location.origin}/programs/${programId}/request-join?name=${name}`}</p>
+            <p className="text-sm break-all">
+              {`${window.location.origin}/programs/${selectedProgram?.id}/request-join?name=${selectedProgram?.name}`}
+            </p>
           </div>
           <button
             onClick={() =>
               handleCopy(
-                `${window.location.origin}/programs/${programId}/request-join?name=${name}`
+                `${window.location.origin}/programs/${selectedProgram?.id}/request-join?name=${selectedProgram?.name}`
               )
             }
             className="flex text-white items-center gap-1 rounded-md bg-emerald-600 p-2 cursor-pointer w-max hover:bg-emerald-500 transition"
@@ -255,9 +186,14 @@ export default function AdminPrograms() {
         </div>
       </Modal>
 
-      <Modal open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen} title={"Delete Program"}>
+      {/* Delete Modal */}
+      <Modal open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen} title="Delete Program">
         <div className="flex flex-col gap-2">
-          <p className="text-sm">{`Are you sure you want to delete this program?`}</p>
+          <p className="text-sm">
+            Are you sure you want to delete{" "}
+            <span className="font-semibold text-[#0d1e43]">{selectedProgram?.name}</span>? This will
+            also remove all candidates in this program.
+          </p>
           <div className="flex gap-4 pt-2">
             <button
               type="button"
@@ -268,7 +204,7 @@ export default function AdminPrograms() {
             </button>
             <button
               type="button"
-              onClick={() => handleDelete(programId)}
+              onClick={handleDelete}
               disabled={deleteMutation.isPending}
               className="w-1/2 bg-red-500 flex items-center justify-center hover:bg-red-600 disabled:bg-red-700 text-white font-semibold py-3 rounded-xl transition"
             >
@@ -276,53 +212,6 @@ export default function AdminPrograms() {
             </button>
           </div>
         </div>
-      </Modal>
-
-      <Modal
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        title={programId ? "Edit Program" : "Create Program"}
-      >
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Program Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Presidential Election"
-              className="w-full bg-white border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl py-3 px-4 text-[#0d1e43] placeholder-slate-400 transition outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Details about the program or criteria"
-              rows={4}
-              className="w-full bg-white border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl py-3 px-4 text-[#0d1e43] placeholder-slate-400 transition outline-none resize-none"
-            />
-          </div>
-
-          <div className="flex gap-4 pt-2">
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="w-1/2 border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold py-3 rounded-xl transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={createMutation.isPending || updateMutation.isPending}
-              className="w-1/2 bg-[#10b981] hover:bg-emerald-600 disabled:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition"
-            >
-              Save Program
-            </button>
-          </div>
-        </form>
       </Modal>
     </div>
   );

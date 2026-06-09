@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { FiCheckSquare, FiShield } from "react-icons/fi";
 import { useRequestJoinProgram } from "../../api/program";
+import { getErrorMessage } from "../../lib/utils/get-error-message.util";
 
 export default function Verify() {
   const search = useSearch({ strict: false }) as Record<string, string>;
@@ -36,10 +37,14 @@ export default function Verify() {
                 {
                   onSuccess: () => {
                     toast.success("Join link sent! Check your email.");
-                    navigate({ to: "/login" });
+                    setTimeout(() => {
+                      navigate({ to: "/login" });
+                    }, 2000);
                   },
-                  onError: () => {
-                    navigate({ to: "/login" });
+                  onError: (err: any) => {
+                    const errorMessage = getErrorMessage(err);
+                    toast.error(errorMessage);
+                    // navigate({ to: "/login" });
                   },
                 }
               );

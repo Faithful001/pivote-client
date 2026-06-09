@@ -39,12 +39,11 @@ export const useProgram = (id: string) => {
 export const useCreateProgram = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (
-      programData: Omit<
-        Program,
-        "id" | "created_at" | "updated_at" | "access_code" | "is_active" | "is_joined"
-      >
-    ) => {
+    mutationFn: async (programData: {
+      name: string;
+      description: string;
+      voting_ends_at: string;
+    }) => {
       const response = await apiClient.post<ApiResponse<Program>>("/programs", programData);
       return response.data.data;
     },
@@ -57,8 +56,15 @@ export const useCreateProgram = () => {
 export const useUpdateProgram = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...programData }: Partial<Program> & { id: string }) => {
-      const response = await apiClient.put<ApiResponse<Program>>(`/programs/${id}`, programData);
+    mutationFn: async ({
+      id,
+      voting_ends_at,
+      ...programData
+    }: Partial<Program> & { id: string; voting_ends_at?: string }) => {
+      const response = await apiClient.put<ApiResponse<Program>>(`/programs/${id}`, {
+        ...programData,
+        voting_ends_at: voting_ends_at,
+      });
       return response.data.data;
     },
     onSuccess: (data) => {
@@ -121,11 +127,15 @@ export const useToggleProgram = () => {
       const response = await apiClient.patch<ApiResponse<Program>>(`/programs/${id}/toggle`, {
         is_active,
       });
-      return response.data.data;
+      return response.data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["programs"] });
-      queryClient.invalidateQueries({ queryKey: ["programs", data.id] });
+      queryClient.invalidateQueries({ queryKey: ["programs", data.data.id] });
+    },
+    onError: (err) => {
+      const error = getErrorMessage(err);
+      toast.error(error);
     },
   });
 };
