@@ -137,7 +137,7 @@ export default function AdminPrograms() {
                           })
                         }
                         className="p-2 text-slate-500 hover:text-emerald-500 hover:bg-slate-100 rounded-lg transition"
-                        title="Edit program"
+                        title="View program"
                       >
                         <FiExternalLink className="w-4 h-4" />
                       </button>
