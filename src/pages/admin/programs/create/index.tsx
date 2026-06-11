@@ -14,10 +14,10 @@ import { Loader2 } from "lucide-react";
 const MIN_MINUTES = 30;
 const MAX_MINUTES = 30 * 24 * 60;
 
-function durationToTimestamp(days: number, hours: number, minutes: number): string {
-  const totalMinutes = days * 24 * 60 + hours * 60 + minutes;
-  return new Date(Date.now() + totalMinutes * 60 * 1000).toISOString();
-}
+// function durationToTimestamp(days: number, hours: number, minutes: number): string {
+//   const totalMinutes = days * 24 * 60 + hours * 60 + minutes;
+//   return new Date(Date.now() + totalMinutes * 60 * 1000).toISOString();
+// }
 
 function validateDuration(days: number, hours: number, minutes: number): string | null {
   const totalMinutes = days * 24 * 60 + hours * 60 + minutes;
@@ -77,7 +77,6 @@ export default function AdminCreateProgram() {
       {
         name,
         description,
-        voting_ends_at: durationToTimestamp(durationDays, durationHours, durationMinutes),
       },
       {
         onSuccess: (data: Program) => {

@@ -10,7 +10,7 @@ export interface Program {
   description: string;
   access_code: string;
   is_active: boolean;
-  is_joined: boolean;
+  voting_ends_at: string;
   created_at: string;
   updated_at: string;
 }
@@ -39,11 +39,7 @@ export const useProgram = (id: string) => {
 export const useCreateProgram = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (programData: {
-      name: string;
-      description: string;
-      voting_ends_at: string;
-    }) => {
+    mutationFn: async (programData: { name: string; description: string }) => {
       const response = await apiClient.post<ApiResponse<Program>>("/programs", programData);
       return response.data.data;
     },
@@ -123,9 +119,18 @@ export const useJoinProgram = () => {
 export const useToggleProgram = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+    mutationFn: async ({
+      id,
+      is_active,
+      voting_ends_at,
+    }: {
+      id: string;
+      is_active: boolean;
+      voting_ends_at: string | null;
+    }) => {
       const response = await apiClient.patch<ApiResponse<Program>>(`/programs/${id}/toggle`, {
         is_active,
+        voting_ends_at,
       });
       return response.data;
     },
