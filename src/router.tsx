@@ -11,7 +11,7 @@ import Results from "./pages/results";
 import Guidelines from "./pages/guidelines";
 import Settings from "./pages/settings";
 import AdminPrograms from "./pages/admin/programs";
-import AdminCandidates from "./pages/admin/candidates";
+// import AdminCandidates from "./pages/admin/candidates";
 import ProgramDashboard from "./pages/programs/[id]";
 
 import Layout from "./components/Layout";
@@ -169,17 +169,17 @@ const adminViewProgramRoute = createRoute({
   ),
 });
 
-const adminCandidatesRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/admin/candidates",
-  component: () => (
-    <ProtectedRoute requireAdmin={true}>
-      <Layout>
-        <AdminCandidates />
-      </Layout>
-    </ProtectedRoute>
-  ),
-});
+// const adminCandidatesRoute = createRoute({
+//   getParentRoute: () => rootRoute,
+//   path: "/admin/candidates",
+//   component: () => (
+//     <ProtectedRoute requireAdmin={true}>
+//       <Layout>
+//         <AdminCandidates />
+//       </Layout>
+//     </ProtectedRoute>
+//   ),
+// });
 
 const programDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -208,7 +208,7 @@ const routeTree = rootRoute.addChildren([
   adminProgramsRoute,
   adminCreateProgramRoute,
   adminViewProgramRoute,
-  adminCandidatesRoute,
+  // adminCandidatesRoute,
   programDashboardRoute,
 ]);
 
