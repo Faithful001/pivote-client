@@ -3,6 +3,7 @@ import { useParams, Link } from "@tanstack/react-router";
 import { useProgram } from "../../../api/program";
 import { useCandidatesByProgram } from "../../../api/candidate";
 import { useProgramVotes } from "../../../api/vote";
+import { API_BASE_URL } from "../../../api/client";
 import { FiChevronLeft, FiCheckSquare } from "react-icons/fi";
 
 export default function ProgramDashboard() {
@@ -12,15 +13,52 @@ export default function ProgramDashboard() {
   const { data: candidates, isLoading: loadingCandidates } = useCandidatesByProgram(programId);
   const { data: voteInfo, isLoading: loadingVotes } = useProgramVotes(programId);
 
-  // Countdown timer state. don't forget refactor to use SSE. CRITICAL!!!!!
-  const [timeLeft, setTimeLeft] = useState(9950); // 2 hours, 45 mins, 50 seconds in seconds
+  // Real-time countdown timer state
+  const [timeLeft, setTimeLeft] = useState(0);
 
+  // Initialize/fallback local time estimation when program loads
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+    if (program?.voting_ends_at) {
+      const diff = Math.floor((new Date(program.voting_ends_at).getTime() - Date.now()) / 1000);
+      setTimeLeft(diff > 0 ? diff : 0);
+    }
+  }, [program]);
+
+  // Connect to the SSE countdown stream
+  useEffect(() => {
+    if (!programId || !program?.is_active) return;
+
+    const token = localStorage.getItem("token");
+    const sseUrl = `${API_BASE_URL}/programs/${programId}/countdown?token=${token}`;
+    const eventSource = new EventSource(sseUrl);
+    let fallbackInterval: ReturnType<typeof setInterval> | null = null;
+
+    eventSource.addEventListener("countdown", (event) => {
+      const val = parseInt(event.data, 10);
+      if (!isNaN(val)) {
+        setTimeLeft(val);
+      }
+    });
+
+    eventSource.onerror = (err) => {
+      console.error("SSE countdown connection error, falling back to local countdown:", err);
+      eventSource.close();
+      
+      // Start local fallback ticker
+      if (!fallbackInterval) {
+        fallbackInterval = setInterval(() => {
+          setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+        }, 1000);
+      }
+    };
+
+    return () => {
+      eventSource.close();
+      if (fallbackInterval) {
+        clearInterval(fallbackInterval);
+      }
+    };
+  }, [programId, program?.is_active]);
 
   const formatCountdown = (seconds: number) => {
     const h = Math.floor(seconds / 3600);

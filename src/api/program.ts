@@ -10,6 +10,7 @@ export interface Program {
   description: string;
   access_code: string;
   is_active: boolean;
+  is_joined: boolean;
   voting_ends_at: string;
   created_at: string;
   updated_at: string;
