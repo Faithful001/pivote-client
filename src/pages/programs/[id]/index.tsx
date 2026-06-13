@@ -5,8 +5,10 @@ import { useCandidatesByProgram } from "../../../api/candidate";
 import { useProgramVotes } from "../../../api/vote";
 import { API_BASE_URL } from "../../../api/client";
 import { FiChevronLeft, FiCheckSquare } from "react-icons/fi";
+import { useMe } from "../../../api/auth";
 
 export default function ProgramDashboard() {
+  const { data: user } = useMe();
   const { programId } = useParams({ from: "/programs/$programId" });
 
   const { data: program, isLoading: loadingProgram } = useProgram(programId);
@@ -43,7 +45,7 @@ export default function ProgramDashboard() {
     eventSource.onerror = (err) => {
       console.error("SSE countdown connection error, falling back to local countdown:", err);
       eventSource.close();
-      
+
       // Start local fallback ticker
       if (!fallbackInterval) {
         fallbackInterval = setInterval(() => {
@@ -119,6 +121,14 @@ export default function ProgramDashboard() {
       {/* Header section matching screenshot */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
+          {user?.role === "user" && (
+            <span>
+              <p className="text-[12px] text-slate-500">Workspace</p>
+              <h4 className="text-md font-semibold text-[#0d1e43] mb-2">
+                {program.workspace?.name}
+              </h4>
+            </span>
+          )}
           <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">{program.name} Dashboard</h1>
           <p className="text-slate-500 text-sm">
             {program.description || "Welcome back to Pivote"}

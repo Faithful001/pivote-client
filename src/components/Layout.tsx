@@ -32,7 +32,7 @@ export default function Layout({ children }: LayoutProps) {
   const [isCreateWorkspaceModalOpen, setIsCreateWorkspaceModalOpen] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
 
-  const { data: workspaces } = useWorkspaces();
+  const { data: workspaces } = useWorkspaces({ enabled: user?.role === "admin" });
   const createWorkspaceMutation = useCreateWorkspace();
 
   const currentWorkspaceId = localStorage.getItem("workspace_id");
@@ -57,12 +57,12 @@ export default function Layout({ children }: LayoutProps) {
     localStorage.setItem("workspace_id", ws.id);
     localStorage.setItem("workspace", JSON.stringify(ws));
     setIsWorkspaceDropdownOpen(false);
-    
+
     // Invalidate react-query cache to force refetch of all queries
     queryClient.invalidateQueries();
-    
+
     toast.success(`Switched to workspace: ${ws.name}`);
-    
+
     // Redirect to home dashboard of the new workspace
     navigate({ to: "/" });
   };
@@ -97,9 +97,7 @@ export default function Layout({ children }: LayoutProps) {
 
   // Add Admin-only links if user is admin
   if (user?.role === "admin") {
-    navItems.push(
-      { label: "Admin Programs", path: "/admin/programs", icon: LiaVoteYeaSolid }
-    );
+    navItems.push({ label: "Admin Programs", path: "/admin/programs", icon: LiaVoteYeaSolid });
   }
 
   if (isLoading) {
@@ -131,7 +129,7 @@ export default function Layout({ children }: LayoutProps) {
                   <span className="truncate">{currentWorkspaceName || "Select Workspace"}</span>
                   <FiChevronDown className="w-3.5 h-3.5 ml-1 flex-shrink-0" />
                 </button>
-                
+
                 {isWorkspaceDropdownOpen && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1 z-50">
                     <div className="max-h-40 overflow-y-auto">
@@ -140,7 +138,9 @@ export default function Layout({ children }: LayoutProps) {
                           key={ws.id}
                           onClick={() => handleSelectWorkspace(ws)}
                           className={`flex items-center w-full px-3 py-2 text-left text-xs hover:bg-white/5 transition ${
-                            ws.id === currentWorkspaceId ? "text-emerald-400 font-bold" : "text-slate-300"
+                            ws.id === currentWorkspaceId
+                              ? "text-emerald-400 font-bold"
+                              : "text-slate-300"
                           }`}
                         >
                           {ws.name}
@@ -212,7 +212,9 @@ export default function Layout({ children }: LayoutProps) {
       >
         <form onSubmit={handleCreateWorkspace} className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Workspace Name</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Workspace Name
+            </label>
             <input
               type="text"
               required

@@ -10,14 +10,14 @@ export interface Workspace {
   updated_at: string;
 }
 
-export const useWorkspaces = () => {
+export const useWorkspaces = ({ enabled = true }: { enabled?: boolean }) => {
   return useQuery<Workspace[], Error>({
     queryKey: ["workspaces"],
     queryFn: async () => {
       const response = await apiClient.get<ApiResponse<Workspace[]>>("/workspaces");
       return response.data.data;
     },
-    enabled: !!localStorage.getItem("token"),
+    enabled: enabled && !!localStorage.getItem("token"),
   });
 };
 

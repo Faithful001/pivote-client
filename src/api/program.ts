@@ -8,7 +8,15 @@ export interface Program {
   id: string;
   name: string;
   description: string;
-  access_code: string;
+  workspace_id: string;
+  workspace: {
+    id: string;
+    name: string;
+    owner_id: string;
+    created_at: string;
+    updated_at: string;
+  };
+  owner_id: string;
   is_active: boolean;
   is_joined: boolean;
   voting_ends_at: string;
@@ -42,7 +50,11 @@ export const useProgram = (id: string) => {
 export const useCreateProgram = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (programData: { name: string; description: string; voting_ends_at: string }) => {
+    mutationFn: async (programData: {
+      name: string;
+      description: string;
+      voting_ends_at: string;
+    }) => {
       const workspaceId = localStorage.getItem("workspace_id");
       const response = await apiClient.post<ApiResponse<Program>>("/programs", {
         ...programData,
@@ -92,7 +104,15 @@ export const useDeleteProgram = () => {
 export const useRequestJoinProgram = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, email, workspace_id }: { id: string; email: string; workspace_id: string }) => {
+    mutationFn: async ({
+      id,
+      email,
+      workspace_id,
+    }: {
+      id: string;
+      email: string;
+      workspace_id: string;
+    }) => {
       const response = await apiClient.post<ApiResponse<void>>(`/programs/${id}/request-join`, {
         email,
         workspace_id,
@@ -112,7 +132,15 @@ export const useRequestJoinProgram = () => {
 export const useJoinProgram = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, token, workspace_id }: { id: string; token: string; workspace_id: string }) => {
+    mutationFn: async ({
+      id,
+      token,
+      workspace_id,
+    }: {
+      id: string;
+      token: string;
+      workspace_id: string;
+    }) => {
       const response = await apiClient.post<ApiResponse<void>>(`/programs/${id}/join`, {
         token,
         workspace_id,

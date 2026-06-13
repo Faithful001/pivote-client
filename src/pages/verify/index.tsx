@@ -33,7 +33,7 @@ export default function Verify() {
 
             if (isFromInvite) {
               requestJoinMutation.mutate(
-                { id: search.program_id, email },
+                { id: search.program_id, email, workspace_id: search.workspace_id },
                 {
                   onSuccess: () => {
                     toast.success("Join link sent! Check your email.");

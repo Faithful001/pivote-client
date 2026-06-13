@@ -147,7 +147,14 @@ export default function Dashboard() {
                         )}
                       </span>
                     </div>
-
+                    {user?.role === "user" && (
+                      <span>
+                        <p className="text-[10px] text-slate-500">Workspace</p>
+                        <h4 className="text-sm font-semibold text-[#0d1e43] mb-2">
+                          {program.workspace?.name}
+                        </h4>
+                      </span>
+                    )}
                     <h3 className="text-lg font-bold text-[#0d1e43] mb-2">{program.name}</h3>
                     <p className="text-slate-500 text-sm line-clamp-3 mb-6">
                       {program.description || "No description provided."}
