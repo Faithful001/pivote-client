@@ -58,6 +58,9 @@ const requestJoinProgramRoute = createRoute({
   validateSearch: (search: Record<string, unknown>) => ({
     email: typeof search.email === "string" ? search.email : undefined,
     name: typeof search.name === "string" ? search.name : undefined,
+    workspace_name: typeof search.workspace_name === "string" ? search.workspace_name : undefined,
+    program_name: typeof search.program_name === "string" ? search.program_name : undefined,
+    workspace_id: typeof search.workspace_id === "string" ? search.workspace_id : undefined,
   }),
 });
 const joinProgramRoute = createRoute({
@@ -68,6 +71,9 @@ const joinProgramRoute = createRoute({
     token: typeof search.token === "string" ? search.token : undefined,
     email: typeof search.email === "string" ? search.email : undefined,
     name: typeof search.name === "string" ? search.name : undefined,
+    workspace_name: typeof search.workspace_name === "string" ? search.workspace_name : undefined,
+    program_name: typeof search.program_name === "string" ? search.program_name : undefined,
+    workspace_id: typeof search.workspace_id === "string" ? search.workspace_id : undefined,
   }),
 });
 

@@ -47,6 +47,19 @@ export default function AdminPrograms() {
 
   const totalMinutes = durationDays * 24 * 60 + durationHours * 60 + durationMinutes;
 
+  const workspaceId = localStorage.getItem("workspace_id") || "";
+  const workspaceObjStr = localStorage.getItem("workspace");
+  let workspaceName = "";
+  if (workspaceObjStr) {
+    try {
+      workspaceName = JSON.parse(workspaceObjStr).name || "";
+    } catch (e) {}
+  }
+
+  const shareLink = selectedProgram
+    ? `${window.location.origin}/programs/${selectedProgram.id}/request-join?workspace_id=${workspaceId}&workspace_name=${encodeURIComponent(workspaceName)}&program_name=${encodeURIComponent(selectedProgram.name)}`
+    : "";
+
   const handleCopy = (text: string) => {
     setIsCopied(true);
     navigator.clipboard.writeText(text);
@@ -312,15 +325,11 @@ export default function AdminPrograms() {
         <div className="flex flex-col gap-2">
           <div className="rounded-md bg-gray-100 p-2">
             <p className="text-sm break-all">
-              {`${window.location.origin}/programs/${selectedProgram?.id}/request-join?name=${selectedProgram?.name}`}
+              {shareLink}
             </p>
           </div>
           <button
-            onClick={() =>
-              handleCopy(
-                `${window.location.origin}/programs/${selectedProgram?.id}/request-join?name=${selectedProgram?.name}`
-              )
-            }
+            onClick={() => handleCopy(shareLink)}
             className="flex text-white items-center gap-1 rounded-md bg-emerald-600 p-2 cursor-pointer w-max hover:bg-emerald-500 transition"
           >
             {isCopied ? <TiTick className="w-4 h-4" /> : <FiCopy className="w-4 h-4" />}

@@ -5,18 +5,19 @@ import { FiCheckCircle, FiAlertCircle, FiArrowRight, FiMail, FiShield } from "re
 
 export default function JoinProgram() {
   const { programId } = useParams({ from: "/programs/$programId/join" });
-  const { token = "", email = "", name = "" } = useSearch({ from: "/programs/$programId/join" });
+  const { token = "", email = "", name = "", workspace_name = "", program_name = "", workspace_id = "" } = useSearch({ from: "/programs/$programId/join" });
 
-  const programName = name ? decodeURIComponent(name) : "the program";
+  const resolvedProgramName = program_name ? decodeURIComponent(program_name) : (name ? decodeURIComponent(name) : "the program");
+  const resolvedWorkspaceName = workspace_name ? decodeURIComponent(workspace_name) : "";
 
   const joinMutation = useJoinProgram();
   const [joined, setJoined] = useState(false);
 
-  const isInvalid = !token || !email;
+  const isInvalid = !token || !email || !workspace_id;
 
   const handleConfirm = () => {
     joinMutation.mutate(
-      { id: programId, token },
+      { id: programId, token, workspace_id },
       {
         onSuccess: () => setJoined(true),
       }
@@ -66,7 +67,7 @@ export default function JoinProgram() {
                 <h1 className="text-2xl font-bold text-[#0d1e43]">You're in! 🎉</h1>
                 <p className="text-slate-500 text-sm leading-relaxed">
                   You've successfully joined{" "}
-                  <span className="font-semibold text-[#0d1e43]">{programName}</span>. Head to the
+                  <span className="font-semibold text-[#0d1e43]">{resolvedProgramName}</span>{resolvedWorkspaceName ? ` in ${resolvedWorkspaceName}` : ""}. Head to the
                   dashboard to cast your vote.
                 </p>
                 <div className="pt-2 space-y-3">
@@ -90,11 +91,19 @@ export default function JoinProgram() {
 
                 {/* Program info */}
                 <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3">
-                  <div>
+                  {resolvedWorkspaceName && (
+                    <div>
+                      <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
+                        Workspace
+                      </p>
+                      <p className="text-[#0d1e43] font-bold text-sm">{resolvedWorkspaceName}</p>
+                    </div>
+                  )}
+                  <div className={resolvedWorkspaceName ? "border-t border-slate-100 pt-3" : ""}>
                     <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
                       Program
                     </p>
-                    <p className="text-[#0d1e43] font-bold text-lg">{programName}</p>
+                    <p className="text-[#0d1e43] font-bold text-lg">{resolvedProgramName}</p>
                   </div>
                   <div className="border-t border-slate-100 pt-3 flex items-center gap-2">
                     <FiMail className="w-4 h-4 text-slate-400 flex-shrink-0" />

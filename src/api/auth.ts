@@ -33,8 +33,16 @@ export const useMe = () => {
   return useQuery<User, Error>({
     queryKey: ["me"],
     queryFn: async () => {
-      const response = await apiClient.get<ApiResponse<User>>("/users/me");
-      return response.data.data;
+      const workspaceId = localStorage.getItem("workspace_id");
+      const url = workspaceId ? `/users/me?workspace_id=${workspaceId}` : "/users/me";
+      const response = await apiClient.get<ApiResponse<{ user: User; workspace: any }>>(url);
+      const { user, workspace } = response.data.data;
+      if (workspace) {
+        localStorage.setItem("workspace_id", workspace.id);
+        localStorage.setItem("workspace", JSON.stringify(workspace));
+      }
+      localStorage.setItem("user", JSON.stringify(user));
+      return user;
     },
     retry: false,
     enabled: !!localStorage.getItem("token"),

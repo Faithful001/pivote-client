@@ -7,9 +7,10 @@ import { toast } from "sonner";
 export default function RequestJoinProgram() {
   const [email, setEmail] = useState("");
   const { programId } = useParams({ from: "/programs/$programId/request-join" });
-  const { name = "" } = useSearch({ from: "/programs/$programId/request-join" });
+  const { name = "", workspace_name = "", program_name = "", workspace_id = "" } = useSearch({ from: "/programs/$programId/request-join" });
 
-  const programName = name ? decodeURIComponent(name) : "the program";
+  const resolvedProgramName = program_name ? decodeURIComponent(program_name) : (name ? decodeURIComponent(name) : "the program");
+  const resolvedWorkspaceName = workspace_name ? decodeURIComponent(workspace_name) : "";
 
   const requestJoinMutation = useRequestJoinProgram();
 
@@ -20,7 +21,7 @@ export default function RequestJoinProgram() {
       toast.warning("Email required");
     }
     requestJoinMutation.mutate(
-      { id: programId, email },
+      { id: programId, email, workspace_id },
       {
         onSuccess: (data: string) => {
           toast.success(data ?? "Join link sent to email");
@@ -52,16 +53,26 @@ export default function RequestJoinProgram() {
             <div className="space-y-6">
               <div>
                 <h1 className="text-2xl font-bold text-[#0d1e43] mb-1">You've been invited</h1>
-                <p className="text-slate-400 text-sm">Confirm below to join the voting program.</p>
+                <p className="text-slate-400 text-sm">
+                  Confirm below to join the voting program{resolvedWorkspaceName ? ` in ${resolvedWorkspaceName}` : ""}.
+                </p>
               </div>
 
               {/* Program info */}
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3">
-                <div>
+                {resolvedWorkspaceName && (
+                  <div>
+                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
+                      Workspace
+                    </p>
+                    <p className="text-[#0d1e43] font-bold text-sm">{resolvedWorkspaceName}</p>
+                  </div>
+                )}
+                <div className={resolvedWorkspaceName ? "border-t border-slate-100 pt-3" : ""}>
                   <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
                     Program
                   </p>
-                  <p className="text-[#0d1e43] font-bold text-lg">{programName}</p>
+                  <p className="text-[#0d1e43] font-bold text-lg">{resolvedProgramName}</p>
                 </div>
               </div>
 

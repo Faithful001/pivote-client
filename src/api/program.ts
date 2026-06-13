@@ -17,10 +17,12 @@ export interface Program {
 }
 
 export const usePrograms = () => {
+  const workspaceId = localStorage.getItem("workspace_id");
   return useQuery<Program[], Error>({
-    queryKey: ["programs"],
+    queryKey: ["programs", workspaceId],
     queryFn: async () => {
-      const response = await apiClient.get<ApiResponse<Program[]>>("/programs");
+      const url = workspaceId ? `/programs?workspace_id=${workspaceId}` : "/programs";
+      const response = await apiClient.get<ApiResponse<Program[]>>(url);
       return response.data.data;
     },
   });
@@ -40,8 +42,12 @@ export const useProgram = (id: string) => {
 export const useCreateProgram = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (programData: { name: string; description: string }) => {
-      const response = await apiClient.post<ApiResponse<Program>>("/programs", programData);
+    mutationFn: async (programData: { name: string; description: string; voting_ends_at: string }) => {
+      const workspaceId = localStorage.getItem("workspace_id");
+      const response = await apiClient.post<ApiResponse<Program>>("/programs", {
+        ...programData,
+        workspace_id: workspaceId,
+      });
       return response.data.data;
     },
     onSuccess: () => {
@@ -86,9 +92,10 @@ export const useDeleteProgram = () => {
 export const useRequestJoinProgram = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, email }: { id: string; email: string }) => {
+    mutationFn: async ({ id, email, workspace_id }: { id: string; email: string; workspace_id: string }) => {
       const response = await apiClient.post<ApiResponse<void>>(`/programs/${id}/request-join`, {
         email,
+        workspace_id,
       });
       return response.data.message;
     },
@@ -105,9 +112,10 @@ export const useRequestJoinProgram = () => {
 export const useJoinProgram = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, token }: { id: string; token: string }) => {
+    mutationFn: async ({ id, token, workspace_id }: { id: string; token: string; workspace_id: string }) => {
       const response = await apiClient.post<ApiResponse<void>>(`/programs/${id}/join`, {
         token,
+        workspace_id,
       });
       return response.data.data;
     },
@@ -149,8 +157,10 @@ export const useToggleProgram = () => {
 export const useRequestJoinLink = () => {
   return useMutation({
     mutationFn: async ({ id, email }: { id: string; email: string }) => {
+      const workspaceId = localStorage.getItem("workspace_id");
       const response = await apiClient.post<ApiResponse<void>>(`/programs/${id}/request-join`, {
         email,
+        workspace_id: workspaceId,
       });
       return response.data;
     },
