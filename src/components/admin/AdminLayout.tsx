@@ -13,7 +13,7 @@ import {
   FiLogOut,
   FiChevronDown,
   FiPlus,
-  // FiUsers,
+  FiUsers,
 } from "react-icons/fi";
 import { toast } from "sonner";
 import { LiaVoteYeaSolid } from "react-icons/lia";
@@ -97,7 +97,8 @@ export default function Layout({ children }: LayoutProps) {
 
   // Add Admin-only links if user is admin
   if (user?.role === "admin") {
-    navItems.push({ label: "Admin Programs", path: "/admin/programs", icon: LiaVoteYeaSolid });
+    navItems.push({ label: "Programs", path: "/admin/programs", icon: LiaVoteYeaSolid });
+    navItems.push({ label: "Candidates", path: "/admin/candidates", icon: FiUsers });
   }
 
   if (isLoading) {

@@ -8,7 +8,7 @@ import {
 import { toast } from "sonner";
 import { FiPlus, FiTrash2, FiInbox, FiShare2, FiCopy, FiExternalLink } from "react-icons/fi";
 import { TiTick } from "react-icons/ti";
-import Modal from "../../../components/modals";
+import Modal from "../../../components/shared/modals";
 import { Loader2 } from "lucide-react";
 import * as Switch from "@radix-ui/react-switch";
 import { useNavigate } from "@tanstack/react-router";
@@ -324,9 +324,7 @@ export default function AdminPrograms() {
       <Modal open={isShareModalOpen} onOpenChange={setIsShareModalOpen} title="Share Program">
         <div className="flex flex-col gap-2">
           <div className="rounded-md bg-gray-100 p-2">
-            <p className="text-sm break-all">
-              {shareLink}
-            </p>
+            <p className="text-sm break-all">{shareLink}</p>
           </div>
           <button
             onClick={() => handleCopy(shareLink)}

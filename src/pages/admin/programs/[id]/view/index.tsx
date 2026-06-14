@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { FiPlus, FiTrash2, FiEdit2, FiCheck, FiX, FiArrowLeft } from "react-icons/fi";
 import { Loader2 } from "lucide-react";
 import * as Switch from "@radix-ui/react-switch";
-import Modal from "../../../../../components/modals";
+import Modal from "../../../../../components/shared/modals";
 
 const MIN_MINUTES = 30;
 const MAX_MINUTES = 30 * 24 * 60;

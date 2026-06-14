@@ -1,7 +1,7 @@
 import { createRootRoute, createRoute, createRouter, Outlet } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 
-// Component imports
+// Page imports
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Verify from "./pages/verify";
@@ -10,19 +10,28 @@ import Vote from "./pages/vote";
 import Results from "./pages/results";
 import Guidelines from "./pages/guidelines";
 import Settings from "./pages/settings";
-import AdminPrograms from "./pages/admin/programs";
-// import AdminCandidates from "./pages/admin/candidates";
 import ProgramDashboard from "./pages/programs/[id]";
-
-import Layout from "./components/Layout";
-import ProtectedRoute from "./components/ProtectedRoute";
 import JoinProgram from "./pages/programs/[id]/join";
 import RequestJoinProgram from "./pages/programs/[id]/request-join";
+
+// Admin page imports
+import AdminLogin from "./pages/admin/login";
+import AdminPrograms from "./pages/admin/programs";
+import AdminCandidates from "./pages/admin/candidates";
 import AdminCreateProgram from "./pages/admin/programs/create";
-// import AdminEditProgram from "./pages/admin/programs/[id]/edit";
 import AdminViewProgram from "./pages/admin/programs/[id]/view";
 
-// 1. Define Root Route
+// Guards & Layout
+import Layout from "./components/user/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminDashboard from "./pages/admin";
+import AdminSettings from "./pages/admin/settings";
+import AdminGuidelines from "./pages/admin/guidelines";
+import AdminVote from "./pages/admin/vote";
+
+// ─────────────────────────────────────────────
+// 1. Root Route
+// ─────────────────────────────────────────────
 const rootRoute = createRootRoute({
   component: () => (
     <>
@@ -32,27 +41,35 @@ const rootRoute = createRootRoute({
   ),
 });
 
-// 2. Define Public Routes
-const loginRoute = createRoute({
+// ─────────────────────────────────────────────
+// 2. Public Routes  (no auth required)
+// ─────────────────────────────────────────────
+const publicLayout = createRoute({
   getParentRoute: () => rootRoute,
+  id: "public",
+  component: Outlet,
+});
+
+const loginRoute = createRoute({
+  getParentRoute: () => publicLayout,
   path: "/login",
   component: Login,
 });
 
 const registerRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => publicLayout,
   path: "/register",
   component: Register,
 });
 
 const verifyRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => publicLayout,
   path: "/verify",
   component: Verify,
 });
 
 const requestJoinProgramRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => publicLayout,
   path: "/programs/$programId/request-join",
   component: RequestJoinProgram,
   validateSearch: (search: Record<string, unknown>) => ({
@@ -63,8 +80,9 @@ const requestJoinProgramRoute = createRoute({
     workspace_id: typeof search.workspace_id === "string" ? search.workspace_id : undefined,
   }),
 });
+
 const joinProgramRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => publicLayout,
   path: "/programs/$programId/join",
   component: JoinProgram,
   validateSearch: (search: Record<string, unknown>) => ({
@@ -77,151 +95,185 @@ const joinProgramRoute = createRoute({
   }),
 });
 
-// 3. Define Protected/Dashboard Routes
-const indexRoute = createRoute({
+// ─────────────────────────────────────────────
+// 3. Authenticated User Routes
+//    One ProtectedRoute guard covers all children
+// ─────────────────────────────────────────────
+const userLayout = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/",
+  id: "user",
   component: () => (
     <ProtectedRoute>
       <Layout>
-        <Dashboard />
+        <Outlet />
       </Layout>
     </ProtectedRoute>
   ),
+});
+
+const dashboardRoute = createRoute({
+  getParentRoute: () => userLayout,
+  path: "/dashboard",
+  component: Dashboard,
 });
 
 const voteRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => userLayout,
   path: "/vote",
-  component: () => (
-    <ProtectedRoute>
-      <Layout>
-        <Vote />
-      </Layout>
-    </ProtectedRoute>
-  ),
+  component: Vote,
 });
 
 const resultsRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => userLayout,
   path: "/results",
-  component: () => (
-    <ProtectedRoute>
-      <Layout>
-        <Results />
-      </Layout>
-    </ProtectedRoute>
-  ),
+  component: Results,
 });
 
 const guidelinesRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => userLayout,
   path: "/guidelines",
-  component: () => (
-    <ProtectedRoute>
-      <Layout>
-        <Guidelines />
-      </Layout>
-    </ProtectedRoute>
-  ),
+  component: Guidelines,
 });
 
 const settingsRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => userLayout,
   path: "/settings",
+  component: Settings,
+});
+
+const programDashboardRoute = createRoute({
+  getParentRoute: () => userLayout,
+  path: "/programs/$programId",
+  component: ProgramDashboard,
+});
+
+// ─────────────────────────────────────────────
+// 4a. Admin Public Routes  (no auth required)
+//     Separate from user public routes so admin
+//     auth pages have their own namespace.
+// ─────────────────────────────────────────────
+const adminPublicLayout = createRoute({
+  getParentRoute: () => rootRoute,
+  id: "admin-public",
+  component: Outlet,
+});
+
+const adminLoginRoute = createRoute({
+  getParentRoute: () => adminPublicLayout,
+  path: "/admin/login",
+  component: AdminLogin,
+});
+
+// ─────────────────────────────────────────────
+// 4b. Admin-only Routes  (/admin/*)
+//     One ProtectedRoute + requireAdmin covers all children.
+//     Nested routes are expressed as parent → children to
+//     avoid TanStack Router prefix-match conflicts.
+// ─────────────────────────────────────────────
+const adminLayout = createRoute({
+  getParentRoute: () => rootRoute,
+  id: "admin",
   component: () => (
-    <ProtectedRoute>
+    <ProtectedRoute requireAdmin>
       <Layout>
-        <Settings />
+        <Outlet />
       </Layout>
     </ProtectedRoute>
   ),
 });
 
-// Admin-only Routes
+const adminDashboardRoute = createRoute({
+  getParentRoute: () => adminLayout,
+  path: "/admin/dashboard",
+  component: AdminDashboard,
+});
+
 const adminProgramsRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => adminLayout,
   path: "/admin/programs",
-  component: () => (
-    <ProtectedRoute requireAdmin={true}>
-      <Layout>
-        <AdminPrograms />
-      </Layout>
-    </ProtectedRoute>
-  ),
+  component: AdminPrograms,
 });
 
 const adminCreateProgramRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => adminLayout,
   path: "/admin/programs/create",
-  component: () => (
-    <ProtectedRoute requireAdmin={true}>
-      <Layout>
-        <AdminCreateProgram />
-      </Layout>
-    </ProtectedRoute>
-  ),
+  component: AdminCreateProgram,
 });
 
 const adminViewProgramRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => adminLayout,
   path: "/admin/programs/$programId/view",
-  component: () => (
-    <ProtectedRoute requireAdmin={true}>
-      <Layout>
-        <AdminViewProgram />
-      </Layout>
-    </ProtectedRoute>
-  ),
+  component: AdminViewProgram,
 });
 
-// const adminCandidatesRoute = createRoute({
-//   getParentRoute: () => rootRoute,
-//   path: "/admin/candidates",
-//   component: () => (
-//     <ProtectedRoute requireAdmin={true}>
-//       <Layout>
-//         <AdminCandidates />
-//       </Layout>
-//     </ProtectedRoute>
-//   ),
-// });
-
-const programDashboardRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/programs/$programId",
-  component: () => (
-    <ProtectedRoute>
-      <Layout>
-        <ProgramDashboard />
-      </Layout>
-    </ProtectedRoute>
-  ),
+const adminVoteRoute = createRoute({
+  getParentRoute: () => adminLayout,
+  path: "/admin/vote",
+  component: AdminVote,
 });
 
-// 4. Construct Route Tree
+const adminGuidelinesRoute = createRoute({
+  getParentRoute: () => adminLayout,
+  path: "/admin/guidelines",
+  component: AdminGuidelines,
+});
+
+const adminCandidatesRoute = createRoute({
+  getParentRoute: () => adminLayout,
+  path: "/admin/candidates",
+  component: AdminCandidates,
+});
+
+const adminSettingsRoute = createRoute({
+  getParentRoute: () => adminLayout,
+  path: "/admin/settings",
+  component: AdminSettings,
+});
+
+// ─────────────────────────────────────────────
+// 5. Route Tree
+// ─────────────────────────────────────────────
 const routeTree = rootRoute.addChildren([
-  indexRoute,
-  loginRoute,
-  registerRoute,
-  verifyRoute,
-  requestJoinProgramRoute,
-  joinProgramRoute,
-  voteRoute,
-  resultsRoute,
-  guidelinesRoute,
-  settingsRoute,
-  adminProgramsRoute,
-  adminCreateProgramRoute,
-  adminViewProgramRoute,
-  // adminCandidatesRoute,
-  programDashboardRoute,
+  // Public — no auth (user)
+  publicLayout.addChildren([
+    loginRoute,
+    registerRoute,
+    verifyRoute,
+    requestJoinProgramRoute,
+    joinProgramRoute,
+  ]),
+
+  // Public — no auth (admin)
+  adminPublicLayout.addChildren([adminLoginRoute]),
+
+  // Authenticated users
+  userLayout.addChildren([
+    dashboardRoute,
+    voteRoute,
+    resultsRoute,
+    guidelinesRoute,
+    settingsRoute,
+    programDashboardRoute,
+  ]),
+
+  // Admin only (/admin/*)
+  adminLayout.addChildren([
+    adminDashboardRoute,
+    adminCreateProgramRoute,
+    adminViewProgramRoute,
+    adminProgramsRoute,
+    adminGuidelinesRoute,
+    adminVoteRoute,
+    adminCandidatesRoute,
+    adminSettingsRoute,
+  ]),
 ]);
 
-// 5. Create Router
+// ─────────────────────────────────────────────
+// 6. Router
+// ─────────────────────────────────────────────
 export const router = createRouter({ routeTree });
 
-// Register types for TypeScript support
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
