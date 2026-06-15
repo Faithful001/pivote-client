@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSearch, useParams, Link } from "@tanstack/react-router";
 import { useJoinProgram } from "../../../../api/program";
-import { FiCheckCircle, FiAlertCircle, FiArrowRight, FiMail, FiShield } from "react-icons/fi";
+import { FiCheckCircle, FiAlertCircle, FiArrowRight, FiShield, FiCheckSquare } from "react-icons/fi";
 
 export default function JoinProgram() {
   const { programId } = useParams({ from: "/programs/$programId/join" });
@@ -25,139 +25,130 @@ export default function JoinProgram() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo / branding */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#0d1e43] shadow-lg mb-4">
-            <span className="text-white font-extrabold text-xl">P</span>
-          </div>
-          <p className="text-slate-400 text-sm font-medium tracking-wide uppercase">Pivote</p>
+    <div className="min-h-screen bg-white text-slate-800 flex items-center justify-center p-6">
+      <div className="w-full max-w-[460px] flex flex-col items-center">
+        {/* Top Logo Icon */}
+        <div className="mb-4 flex items-center gap-2">
+          <FiCheckSquare className="w-10 h-10 text-amber-500" />
+          <p className="text-2xl font-bold">PIVOTE</p>
         </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
-          {/* Top accent */}
-          <div className="h-1.5 bg-gradient-to-r from-emerald-400 to-teal-500" />
-
-          <div className="p-8">
-            {isInvalid ? (
-              /* Invalid / missing params */
-              <div className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-50 mb-2">
-                  <FiAlertCircle className="w-8 h-8 text-red-400" />
-                </div>
-                <h1 className="text-xl font-bold text-[#0d1e43]">Invalid Join Link</h1>
-                <p className="text-slate-400 text-sm leading-relaxed">
-                  This link appears to be incomplete or corrupted. Please request a new join link.
-                </p>
+        {/* Content Wrapper */}
+        <div className="w-full text-center">
+          {isInvalid ? (
+            /* Invalid / missing params */
+            <div className="space-y-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-50 mb-2">
+                <FiAlertCircle className="w-8 h-8 text-red-500" />
+              </div>
+              <h1 className="text-2xl font-extrabold text-[#0d1e43] tracking-tight">Invalid Join Link</h1>
+              <p className="text-slate-500 text-[13px] leading-relaxed max-w-[340px] mx-auto">
+                This link appears to be incomplete or corrupted. Please request a new join link.
+              </p>
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center gap-2 mt-4 bg-[#10b981] hover:bg-emerald-600 text-white font-bold py-3.5 px-6 rounded-md text-sm transition duration-150 shadow-sm"
+              >
+                Go to Dashboard <FiArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          ) : joined ? (
+            /* Success state */
+            <div className="space-y-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 mb-2">
+                <FiCheckCircle className="w-9 h-9 text-emerald-500" />
+              </div>
+              <h1 className="text-2xl font-extrabold text-[#0d1e43] tracking-tight">You're in! 🎉</h1>
+              <p className="text-slate-500 text-[13px] leading-relaxed max-w-[340px] mx-auto">
+                You've successfully joined <span className="font-semibold text-[#0d1e43]">{resolvedProgramName}</span>{resolvedWorkspaceName ? ` in ${resolvedWorkspaceName}` : ""}. Head to the dashboard to cast your vote.
+              </p>
+              <div className="pt-2">
                 <Link
-                  to="/"
-                  className="inline-flex items-center gap-2 mt-4 bg-[#0d1e43] text-white font-semibold py-3 px-6 rounded-xl text-sm hover:bg-slate-900 transition"
+                  to="/dashboard"
+                  className="flex items-center justify-center gap-2 w-full bg-[#10b981] hover:bg-emerald-600 text-white font-bold py-3.5 rounded-md text-sm transition duration-150"
                 >
                   Go to Dashboard <FiArrowRight className="w-4 h-4" />
                 </Link>
               </div>
-            ) : joined ? (
-              /* Success state */
-              <div className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 mb-2">
-                  <FiCheckCircle className="w-9 h-9 text-emerald-500" />
-                </div>
-                <h1 className="text-2xl font-bold text-[#0d1e43]">You're in! 🎉</h1>
-                <p className="text-slate-500 text-sm leading-relaxed">
-                  You've successfully joined{" "}
-                  <span className="font-semibold text-[#0d1e43]">{resolvedProgramName}</span>{resolvedWorkspaceName ? ` in ${resolvedWorkspaceName}` : ""}. Head to the
-                  dashboard to cast your vote.
+            </div>
+          ) : (
+            /* Confirmation state */
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-3xl font-extrabold text-[#0d1e43] mb-2 tracking-tight">
+                  You've Been Invited
+                </h1>
+                <p className="text-slate-500 text-[13px] leading-relaxed max-w-[340px] mx-auto mb-6">
+                  Confirm below to accept the invitation and join the voting program.
                 </p>
-                <div className="pt-2 space-y-3">
-                  <Link
-                    to="/"
-                    className="flex items-center justify-center gap-2 w-full bg-[#0d1e43] text-white font-semibold py-3 rounded-xl text-sm hover:bg-slate-900 transition"
-                  >
-                    Go to Dashboard <FiArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
               </div>
-            ) : (
-              /* Confirmation state */
-              <div className="space-y-6">
-                <div>
-                  <h1 className="text-2xl font-bold text-[#0d1e43] mb-1">You've been invited</h1>
-                  <p className="text-slate-400 text-sm">
-                    Confirm below to join the voting program.
-                  </p>
-                </div>
 
-                {/* Program info */}
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3">
-                  {resolvedWorkspaceName && (
-                    <div>
-                      <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
-                        Workspace
-                      </p>
-                      <p className="text-[#0d1e43] font-bold text-sm">{resolvedWorkspaceName}</p>
-                    </div>
-                  )}
-                  <div className={resolvedWorkspaceName ? "border-t border-slate-100 pt-3" : ""}>
+              {/* Program info card */}
+              <div className="bg-[#f9fafb] border border-slate-200 rounded-md p-5 text-left space-y-3">
+                {resolvedWorkspaceName && (
+                  <div>
                     <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
-                      Program
+                      Workspace
                     </p>
-                    <p className="text-[#0d1e43] font-bold text-lg">{resolvedProgramName}</p>
-                  </div>
-                  <div className="border-t border-slate-100 pt-3 flex items-center gap-2">
-                    <FiMail className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                    <p className="text-slate-500 text-sm truncate">{email}</p>
-                  </div>
-                </div>
-
-                {/* Security note */}
-                <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-100 rounded-xl p-4">
-                  <FiShield className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-emerald-700 text-xs leading-relaxed">
-                    This is a one-time secure link. It will expire after use.
-                  </p>
-                </div>
-
-                {/* Error */}
-                {joinMutation.isError && (
-                  <div className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-xl p-4">
-                    <FiAlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-                    <p className="text-red-600 text-sm">
-                      {(joinMutation.error as any)?.response?.data?.message ||
-                        "Something went wrong. Please try again."}
-                    </p>
+                    <p className="text-[#0d1e43] font-bold text-sm">{resolvedWorkspaceName}</p>
                   </div>
                 )}
+                <div className={resolvedWorkspaceName ? "border-t border-slate-100 pt-3" : ""}>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
+                    Program
+                  </p>
+                  <p className="text-[#0d1e43] font-bold text-lg">{resolvedProgramName}</p>
+                </div>
+                <div className="border-t border-slate-100 pt-3">
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
+                    Email Address
+                  </p>
+                  <p className="text-slate-600 text-sm truncate font-medium">{email}</p>
+                </div>
+              </div>
 
-                {/* CTA */}
-                <button
-                  id="confirm-join-btn"
-                  onClick={handleConfirm}
-                  disabled={joinMutation.isPending}
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-sm shadow-emerald-200"
-                >
-                  {joinMutation.isPending ? (
-                    <>
-                      <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                      Confirming...
-                    </>
-                  ) : (
-                    <>
-                      Confirm & Join Program <FiArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-
-                <p className="text-center text-slate-400 text-xs">
-                  Not expecting this?{" "}
-                  <Link to="/" className="text-[#0d1e43] font-semibold hover:underline">
-                    Ignore and go home
-                  </Link>
+              {/* Security info */}
+              <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-100 rounded-md p-4 text-left">
+                <FiShield className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                <p className="text-emerald-700 text-xs leading-relaxed">
+                  This is a one-time secure link. It will automatically expire after use.
                 </p>
               </div>
-            )}
-          </div>
+
+              {/* Error block */}
+              {joinMutation.isError && (
+                <div className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-md p-4 text-left">
+                  <FiAlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                  <p className="text-red-700 text-xs font-semibold">
+                    {(joinMutation.error as any)?.response?.data?.message ||
+                      "Something went wrong. Please try again."}
+                  </p>
+                </div>
+              )}
+
+              {/* CTA Button */}
+              <button
+                id="confirm-join-btn"
+                onClick={handleConfirm}
+                disabled={joinMutation.isPending}
+                className="w-full bg-[#10b981] hover:bg-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 px-4 rounded-md transition duration-150 flex items-center justify-center gap-2 mt-4 text-[15px]"
+              >
+                {joinMutation.isPending ? (
+                  <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Confirm & Join Program <FiArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+
+              <div className="text-center pt-2 text-sm">
+                <Link to="/dashboard" className="text-[#10b981] hover:text-emerald-600 font-semibold hover:underline">
+                  Ignore and go home
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

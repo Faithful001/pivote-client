@@ -15,10 +15,12 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
 
   // 1. No token → send to login
   useEffect(() => {
-    if (!token && !window.location.pathname.includes("admin")) {
-      navigate({ to: "/login" });
-    } else if (token && window.location.pathname.includes("admin")) {
-      navigate({ to: "/admin/login" });
+    if (!token) {
+      if (window.location.pathname.includes("admin")) {
+        navigate({ to: "/admin/login" });
+      } else {
+        navigate({ to: "/login" });
+      }
     }
   }, [token, navigate]);
 

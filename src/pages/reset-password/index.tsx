@@ -1,57 +1,48 @@
-import React, { useState, useEffect } from "react";
-import { useRegister } from "../../api/auth";
+import React, { useState } from "react";
+import { useResetPassword } from "../../api/auth";
 import { toast } from "sonner";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { FiCheckSquare, FiEye, FiEyeOff } from "react-icons/fi";
 
-export default function Register() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+export default function ResetPassword() {
+  const search = useSearch({ strict: false }) as Record<string, string>;
+  const [email, setEmail] = useState(search?.email || "");
+  const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const registerMutation = useRegister();
+  const resetPasswordMutation = useResetPassword();
   const navigate = useNavigate();
-
-  const search = useSearch({ strict: false }) as {
-    email?: string;
-    program_id?: string;
-    program_name?: string;
-  };
-
-  // pre-fill email if it came from the invite link
-  useEffect(() => {
-    if (search.email) {
-      setEmail(search.email);
-    }
-  }, [search.email]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !email || !password) {
+    if (!email || !otp || !password || !confirmPassword) {
       toast.error("All fields are required");
       return;
     }
 
-    registerMutation.mutate(
-      { name, email, password },
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    resetPasswordMutation.mutate(
+      { email, otp, password },
       {
         onSuccess: (data) => {
           if (data.success) {
-            toast.success("Registration successful! Check your email for OTP.");
-            navigate({
-              to: "/verify",
-              search: {
-                email,
-                ...(search.program_id && {
-                  program_id: search.program_id,
-                  program_name: search.program_name,
-                }),
-              },
-            });
+            toast.success("Password reset successfully! Please log in.");
+            navigate({ to: "/login" });
           } else {
-            toast.error(data.message || "Registration failed");
+            toast.error(data.message || "Failed to reset password");
           }
         },
         onError: (err: any) => {
@@ -61,8 +52,6 @@ export default function Register() {
       }
     );
   };
-
-  const isFromInvite = !!search.program_id;
 
   return (
     <div className="min-h-screen bg-white text-slate-800 flex items-center justify-center p-6">
@@ -75,38 +64,14 @@ export default function Register() {
 
         {/* Header Text */}
         <h1 className="text-3xl font-extrabold text-[#0d1e43] mb-2 tracking-tight text-center">
-          {isFromInvite ? "Join Program" : "Create Account"}
+          Reset Password
         </h1>
+        <p className="text-slate-500 text-[13px] text-center max-w-[340px] leading-relaxed mb-8">
+          Enter the verification code sent to your email and choose a new password
+        </p>
 
-        {isFromInvite ? (
-          <div className="text-center mb-8">
-            <p className="text-slate-500 text-[13px] leading-relaxed">
-              You've been invited to join <strong className="text-[#0d1e43]">{search.program_name}</strong>.
-            </p>
-            <p className="text-slate-400 text-xs mt-1">Create an account to accept the invitation</p>
-          </div>
-        ) : (
-          <p className="text-slate-500 text-[13px] text-center max-w-[340px] leading-relaxed mb-8">
-            Create a Pivote account to start participating and voting in your workspace programs
-          </p>
-        )}
-
-        {/* Register Form */}
+        {/* Form */}
         <form onSubmit={handleSubmit} className="w-full space-y-5">
-          {/* Full Name field */}
-          <div className="space-y-2">
-            <label className="block text-[14px] font-semibold text-[#0d1e43] text-left">
-              Full Name
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your full name"
-              className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 px-4 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
-            />
-          </div>
-
           {/* Email field */}
           <div className="space-y-2">
             <label className="block text-[14px] font-semibold text-[#0d1e43] text-left">
@@ -117,20 +82,32 @@ export default function Register() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email address"
-              readOnly={!!search.email}
+              readOnly={!!search?.email}
               className={`w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 px-4 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none ${
-                search.email ? "opacity-60 cursor-not-allowed" : ""
+                search?.email ? "opacity-60 cursor-not-allowed" : ""
               }`}
             />
-            {search.email && (
-              <p className="text-[11px] text-slate-400">Email locked to your invitation address</p>
-            )}
           </div>
 
-          {/* Password field */}
+          {/* OTP field */}
           <div className="space-y-2">
             <label className="block text-[14px] font-semibold text-[#0d1e43] text-left">
-              Password
+              4-Digit OTP Code
+            </label>
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="1234"
+              maxLength={4}
+              className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 px-4 text-slate-800 text-center tracking-widest font-bold text-lg placeholder-slate-300 transition duration-150 outline-none"
+            />
+          </div>
+
+          {/* New Password field */}
+          <div className="space-y-2">
+            <label className="block text-[14px] font-semibold text-[#0d1e43] text-left">
+              New Password
             </label>
             <div className="relative">
               <input
@@ -150,35 +127,48 @@ export default function Register() {
             </div>
           </div>
 
+          {/* Confirm Password field */}
+          <div className="space-y-2">
+            <label className="block text-[14px] font-semibold text-[#0d1e43] text-left">
+              Confirm Password
+            </label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••"
+                className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 pl-4 pr-10 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none flex items-center justify-center"
+              >
+                {showConfirmPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+              </button>
+            </div>
+          </div>
+
           {/* Submit button */}
           <button
             type="submit"
-            disabled={registerMutation.isPending}
+            disabled={resetPasswordMutation.isPending}
             className="w-full bg-[#10b981] hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-md transition duration-150 flex items-center justify-center gap-2 mt-6 text-[15px]"
           >
-            {registerMutation.isPending ? (
+            {resetPasswordMutation.isPending ? (
               <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-            ) : isFromInvite ? (
-              "Create Account & Join"
             ) : (
-              "Create Account"
+              "Reset Password"
             )}
           </button>
         </form>
 
         {/* Back Link */}
         <div className="text-center mt-6 text-sm text-slate-500">
-          Already have an account?{" "}
-          <Link
-            to="/login"
-            search={
-              isFromInvite
-                ? { program_id: search.program_id, program_name: search.program_name }
-                : {}
-            }
-            className="text-[#10b981] hover:text-emerald-600 font-semibold hover:underline"
-          >
-            Sign in here
+          Remember your password?{" "}
+          <Link to="/login" className="text-[#10b981] hover:text-emerald-600 font-semibold hover:underline">
+            Back to login
           </Link>
         </div>
       </div>

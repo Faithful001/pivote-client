@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { useLogin } from "../../../api/auth";
 import { toast } from "sonner";
-import { Link } from "@tanstack/react-router";
-import { FiMail, FiLock, FiShield } from "react-icons/fi";
+import { useNavigate } from "@tanstack/react-router";
+import { FiCheckSquare, FiEye, FiEyeOff } from "react-icons/fi";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,19 +26,18 @@ export default function AdminLogin() {
           if (data.success) {
             const role = data.data?.user?.role;
             if (role !== "admin") {
-              toast.error("Access denied. Admin credentials required.");
+              toast.error("Invalid credentials");
               localStorage.removeItem("token");
               return;
             }
             toast.success("Welcome back, Admin!");
-            window.location.href = "/admin/programs";
+            navigate({ to: "/admin/dashboard" });
           } else {
             toast.error(data.message || "Login failed");
           }
         },
         onError: (err: any) => {
-          const errMsg =
-            err.response?.data?.message || err.message || "An error occurred";
+          const errMsg = err.response?.data?.message || err.message || "An error occurred";
           toast.error(errMsg);
         },
       }
@@ -44,92 +45,85 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0f1e] text-slate-100 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background glows */}
-      <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-violet-600/10 rounded-full blur-[100px] pointer-events-none" />
-
-      <div className="w-full max-w-md relative">
-        {/* Admin badge */}
-        <div className="flex justify-center mb-6">
-          <span className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold px-4 py-1.5 rounded-full tracking-widest uppercase">
-            <FiShield className="w-3.5 h-3.5" />
-            Admin Portal
-          </span>
+    <div className="min-h-screen bg-white text-slate-800 flex items-center justify-center p-6">
+      <div className="w-full max-w-[460px] flex flex-col items-center">
+        {/* Top Logo Icon */}
+        <div className="mb-4 flex items-center gap-2">
+          <FiCheckSquare className="w-10 h-10 text-amber-500" />
+          <p className="text-2xl font-bold">PIVOTE</p>
         </div>
 
-        <div className="bg-slate-900/70 backdrop-blur-xl border border-slate-800 p-8 rounded-2xl shadow-2xl">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 text-2xl font-bold text-slate-100 mb-2">
-              PIVOTE
-              <span className="text-xs font-semibold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md">
-                Admin
-              </span>
-            </div>
-            <p className="text-slate-400 text-sm">
-              Sign in with your administrator credentials
-            </p>
+        {/* Header Text */}
+        <h1 className="text-3xl font-extrabold text-[#0d1e43] mb-2 tracking-tight text-center">
+          Welcome Back Admin!
+        </h1>
+        <p className="text-slate-500 text-[13px] text-center max-w-[340px] leading-relaxed mb-8">
+          Welcome back to Pivote Admin Portal, please log into manage the online voting system
+        </p>
+
+        {/* Login Form */}
+        <form onSubmit={handleSubmit} className="w-full space-y-5">
+          {/* Email field */}
+          <div className="space-y-2">
+            <label className="block text-[14px] font-semibold text-[#0d1e43] text-left">
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address"
+              className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 px-4 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Admin Email
-              </label>
-              <div className="relative">
-                <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@domain.com"
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl py-3 pl-10 pr-4 text-slate-100 placeholder-slate-600 transition outline-none"
-                />
-              </div>
+          {/* Password field */}
+          <div className="space-y-2">
+            <label className="block text-[14px] font-semibold text-[#0d1e43] text-left">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••"
+                className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 pl-4 pr-10 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none flex items-center justify-center"
+              >
+                {showPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+              </button>
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl py-3 pl-10 pr-4 text-slate-100 placeholder-slate-600 transition outline-none"
-                />
-              </div>
-            </div>
-
+          {/* Forgot Password mock link */}
+          {/* <div className="flex justify-end pt-1">
             <button
-              type="submit"
-              disabled={loginMutation.isPending}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
+              type="button"
+              onClick={() => toast.info("Password reset must be requested from the super admin.")}
+              className="text-[#10b981] hover:text-emerald-600 text-xs font-semibold hover:underline"
             >
-              {loginMutation.isPending ? (
-                <>
-                  <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                <>
-                  <FiShield className="w-4 h-4" />
-                  Sign In as Admin
-                </>
-              )}
+              Forgot Password
             </button>
-          </form>
+          </div> */}
 
-          <div className="text-center mt-6 text-sm text-slate-500">
-            Not an admin?{" "}
-            <Link to="/login" className="text-indigo-400 hover:underline">
-              Go to user login
-            </Link>
-          </div>
-        </div>
+          {/* Submit button */}
+          <button
+            type="submit"
+            disabled={loginMutation.isPending}
+            className="w-full bg-[#10b981] hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-md transition duration-150 flex items-center justify-center gap-2 mt-4 text-[15px]"
+          >
+            {loginMutation.isPending ? (
+              <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            ) : (
+              "Log In"
+            )}
+          </button>
+        </form>
       </div>
     </div>
   );

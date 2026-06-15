@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { useMe } from "../api/auth";
+import { useMe } from "../../api/auth";
 import { useQueryClient } from "@tanstack/react-query";
-import { useWorkspaces, useCreateWorkspace, type Workspace } from "../api/workspace";
-import Modal from "./modals";
+import { useWorkspaces, useCreateWorkspace, type Workspace } from "../../api/workspace";
+import Modal from "../shared/modals";
 import {
   FiGrid,
   FiCheckSquare,
-  FiBarChart2,
   FiBookOpen,
   FiSettings,
   FiLogOut,
@@ -50,7 +49,7 @@ export default function Layout({ children }: LayoutProps) {
     localStorage.removeItem("workspace");
     localStorage.removeItem("user");
     toast.success("Logged out successfully");
-    navigate({ to: "/login" });
+    navigate({ to: "/admin/login" });
   };
 
   const handleSelectWorkspace = (ws: Workspace) => {
@@ -64,7 +63,7 @@ export default function Layout({ children }: LayoutProps) {
     toast.success(`Switched to workspace: ${ws.name}`);
 
     // Redirect to home dashboard of the new workspace
-    navigate({ to: "/" });
+    navigate({ to: "/admin/dashboard" });
   };
 
   const handleCreateWorkspace = (e: React.FormEvent) => {
@@ -88,18 +87,12 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   const navItems = [
-    { label: "Dashboard", path: "/", icon: FiGrid },
-    { label: "Vote", path: "/vote", icon: FiCheckSquare },
-    { label: "Results", path: "/results", icon: FiBarChart2 },
-    { label: "Voters Guidelines", path: "/guidelines", icon: FiBookOpen },
-    { label: "Settings", path: "/settings", icon: FiSettings },
+    { label: "Dashboard", path: "/admin/dashboard", icon: FiGrid },
+    { label: "Programs", path: "/admin/programs", icon: LiaVoteYeaSolid },
+    { label: "Candidates", path: "/admin/candidates", icon: FiUsers },
+    { label: "Voters Guidelines", path: "/admin/guidelines", icon: FiBookOpen },
+    { label: "Settings", path: "/admin/settings", icon: FiSettings },
   ];
-
-  // Add Admin-only links if user is admin
-  if (user?.role === "admin") {
-    navItems.push({ label: "Programs", path: "/admin/programs", icon: LiaVoteYeaSolid });
-    navItems.push({ label: "Candidates", path: "/admin/candidates", icon: FiUsers });
-  }
 
   if (isLoading) {
     return (

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSearch, useParams } from "@tanstack/react-router";
 import { useRequestJoinProgram } from "../../../../api/program";
-import { FiMail } from "react-icons/fi";
+import { FiCheckSquare } from "react-icons/fi";
 import { toast } from "sonner";
 
 export default function RequestJoinProgram() {
@@ -19,6 +19,7 @@ export default function RequestJoinProgram() {
 
     if (!email) {
       toast.warning("Email required");
+      return;
     }
     requestJoinMutation.mutate(
       { id: programId, email, workspace_id },
@@ -31,81 +32,74 @@ export default function RequestJoinProgram() {
   };
 
   return (
-    <form
-      onSubmit={handleRequestJoin}
-      className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 flex items-center justify-center p-4"
-    >
-      <div className="w-full max-w-md">
-        {/* Logo / branding */}
+    <div className="min-h-screen bg-white text-slate-800 flex items-center justify-center p-6">
+      <div className="w-full max-w-[460px] flex flex-col items-center">
+        {/* Top Logo Icon */}
+        <div className="mb-4 flex items-center gap-2">
+          <FiCheckSquare className="w-10 h-10 text-amber-500" />
+          <p className="text-2xl font-bold">PIVOTE</p>
+        </div>
+
+        {/* Header Text */}
+        <h1 className="text-3xl font-extrabold text-[#0d1e43] mb-2 tracking-tight text-center">
+          You've Been Invited
+        </h1>
+
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#0d1e43] shadow-lg mb-4">
-            <span className="text-white font-extrabold text-xl">P</span>
-          </div>
-          <p className="text-slate-400 text-sm font-medium tracking-wide uppercase">Pivote</p>
+          <p className="text-slate-500 text-[13px] leading-relaxed">
+            Confirm your email to join {resolvedWorkspaceName ? `the ${resolvedWorkspaceName} workspace` : "the program"}.
+          </p>
         </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
-          {/* Top accent */}
-          <div className="h-1.5 bg-gradient-to-r from-emerald-400 to-teal-500" />
-
-          <div className="p-8">
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl font-bold text-[#0d1e43] mb-1">You've been invited</h1>
-                <p className="text-slate-400 text-sm">
-                  Confirm below to join the voting program{resolvedWorkspaceName ? ` in ${resolvedWorkspaceName}` : ""}.
-                </p>
-              </div>
-
-              {/* Program info */}
-              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3">
-                {resolvedWorkspaceName && (
-                  <div>
-                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
-                      Workspace
-                    </p>
-                    <p className="text-[#0d1e43] font-bold text-sm">{resolvedWorkspaceName}</p>
-                  </div>
-                )}
-                <div className={resolvedWorkspaceName ? "border-t border-slate-100 pt-3" : ""}>
-                  <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
-                    Program
-                  </p>
-                  <p className="text-[#0d1e43] font-bold text-lg">{resolvedProgramName}</p>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#0d1e43] uppercase tracking-wider mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input
-                    id="join-link-email-input"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl py-3 pl-10 pr-4 text-[#0d1e43] text-sm placeholder-slate-300 transition outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* CTA */}
-              <button
-                id="confirm-request-join-btn"
-                // onClick={handleRequestJoin}
-                disabled={requestJoinMutation.isPending}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-sm shadow-emerald-200"
-              >
-                <>{!requestJoinMutation.isPending ? "Request to join" : "Requesting..."}</>
-              </button>
+        {/* Program Info Panel */}
+        <div className="w-full bg-[#f9fafb] border border-slate-200 rounded-md p-5 mb-6 space-y-3">
+          {resolvedWorkspaceName && (
+            <div>
+              <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
+                Workspace
+              </p>
+              <p className="text-[#0d1e43] font-bold text-sm">{resolvedWorkspaceName}</p>
             </div>
+          )}
+          <div className={resolvedWorkspaceName ? "border-t border-slate-100 pt-3" : ""}>
+            <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
+              Program
+            </p>
+            <p className="text-[#0d1e43] font-bold text-lg">{resolvedProgramName}</p>
           </div>
         </div>
+
+        {/* Join Form */}
+        <form onSubmit={handleRequestJoin} className="w-full space-y-5">
+          {/* Email field */}
+          <div className="space-y-2">
+            <label className="block text-[14px] font-semibold text-[#0d1e43] text-left">
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address"
+              className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 px-4 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
+            />
+          </div>
+
+          {/* Submit button */}
+          <button
+            id="confirm-request-join-btn"
+            type="submit"
+            disabled={requestJoinMutation.isPending}
+            className="w-full bg-[#10b981] hover:bg-emerald-600 disabled:opacity-60 text-white font-bold py-3.5 px-4 rounded-md transition duration-150 flex items-center justify-center gap-2 mt-6 text-[15px]"
+          >
+            {requestJoinMutation.isPending ? (
+              <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            ) : (
+              "Request to join"
+            )}
+          </button>
+        </form>
       </div>
-    </form>
+    </div>
   );
 }

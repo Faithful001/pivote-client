@@ -99,3 +99,23 @@ export const useUpdateUser = () => {
     },
   });
 };
+
+// Forgot password mutation
+export const useForgotPassword = () => {
+  return useMutation({
+    mutationFn: async (payload: { email: string }) => {
+      const response = await apiClient.post<ApiResponse<null>>("/auth/forgot-password", payload);
+      return response.data;
+    },
+  });
+};
+
+// Reset password mutation
+export const useResetPassword = () => {
+  return useMutation({
+    mutationFn: async (payload: Record<string, string>) => {
+      const response = await apiClient.post<ApiResponse<null>>("/auth/reset-password", payload);
+      return response.data;
+    },
+  });
+};

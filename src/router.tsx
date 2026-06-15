@@ -1,4 +1,10 @@
-import { createRootRoute, createRoute, createRouter, Outlet } from "@tanstack/react-router";
+import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  Outlet,
+  redirect,
+} from "@tanstack/react-router";
 import { Toaster } from "sonner";
 
 // Page imports
@@ -13,6 +19,8 @@ import Settings from "./pages/settings";
 import ProgramDashboard from "./pages/programs/[id]";
 import JoinProgram from "./pages/programs/[id]/join";
 import RequestJoinProgram from "./pages/programs/[id]/request-join";
+import ForgotPassword from "./pages/forgot-password";
+import ResetPassword from "./pages/reset-password";
 
 // Admin page imports
 import AdminLogin from "./pages/admin/login";
@@ -23,6 +31,7 @@ import AdminViewProgram from "./pages/admin/programs/[id]/view";
 
 // Guards & Layout
 import Layout from "./components/user/Layout";
+import AdminLayout from "./components/admin/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminDashboard from "./pages/admin";
 import AdminSettings from "./pages/admin/settings";
@@ -30,7 +39,7 @@ import AdminGuidelines from "./pages/admin/guidelines";
 import AdminVote from "./pages/admin/vote";
 
 // ─────────────────────────────────────────────
-// 1. Root Route
+// 1. Root & Index Routes
 // ─────────────────────────────────────────────
 const rootRoute = createRootRoute({
   component: () => (
@@ -41,35 +50,47 @@ const rootRoute = createRootRoute({
   ),
 });
 
-// ─────────────────────────────────────────────
-// 2. Public Routes  (no auth required)
-// ─────────────────────────────────────────────
-const publicLayout = createRoute({
+const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  id: "public",
-  component: Outlet,
+  path: "/",
+  beforeLoad: () => {
+    const token = localStorage.getItem("token");
+    const userJson = localStorage.getItem("user");
+    if (!token) {
+      throw redirect({ to: "/login" });
+    }
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        if (user.role === "admin") {
+          throw redirect({ to: "/admin/dashboard" });
+        }
+      } catch (e) {}
+    }
+    throw redirect({ to: "/dashboard" });
+  },
 });
 
 const loginRoute = createRoute({
-  getParentRoute: () => publicLayout,
+  getParentRoute: () => rootRoute,
   path: "/login",
   component: Login,
 });
 
 const registerRoute = createRoute({
-  getParentRoute: () => publicLayout,
+  getParentRoute: () => rootRoute,
   path: "/register",
   component: Register,
 });
 
 const verifyRoute = createRoute({
-  getParentRoute: () => publicLayout,
+  getParentRoute: () => rootRoute,
   path: "/verify",
   component: Verify,
 });
 
 const requestJoinProgramRoute = createRoute({
-  getParentRoute: () => publicLayout,
+  getParentRoute: () => rootRoute,
   path: "/programs/$programId/request-join",
   component: RequestJoinProgram,
   validateSearch: (search: Record<string, unknown>) => ({
@@ -82,7 +103,7 @@ const requestJoinProgramRoute = createRoute({
 });
 
 const joinProgramRoute = createRoute({
-  getParentRoute: () => publicLayout,
+  getParentRoute: () => rootRoute,
   path: "/programs/$programId/join",
   component: JoinProgram,
   validateSearch: (search: Record<string, unknown>) => ({
@@ -93,6 +114,18 @@ const joinProgramRoute = createRoute({
     program_name: typeof search.program_name === "string" ? search.program_name : undefined,
     workspace_id: typeof search.workspace_id === "string" ? search.workspace_id : undefined,
   }),
+});
+
+const forgotPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/forgot-password",
+  component: ForgotPassword,
+});
+
+const resetPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/reset-password",
+  component: ResetPassword,
 });
 
 // ─────────────────────────────────────────────
@@ -147,19 +180,8 @@ const programDashboardRoute = createRoute({
   component: ProgramDashboard,
 });
 
-// ─────────────────────────────────────────────
-// 4a. Admin Public Routes  (no auth required)
-//     Separate from user public routes so admin
-//     auth pages have their own namespace.
-// ─────────────────────────────────────────────
-const adminPublicLayout = createRoute({
-  getParentRoute: () => rootRoute,
-  id: "admin-public",
-  component: Outlet,
-});
-
 const adminLoginRoute = createRoute({
-  getParentRoute: () => adminPublicLayout,
+  getParentRoute: () => rootRoute,
   path: "/admin/login",
   component: AdminLogin,
 });
@@ -175,9 +197,9 @@ const adminLayout = createRoute({
   id: "admin",
   component: () => (
     <ProtectedRoute requireAdmin>
-      <Layout>
+      <AdminLayout>
         <Outlet />
-      </Layout>
+      </AdminLayout>
     </ProtectedRoute>
   ),
 });
@@ -234,17 +256,18 @@ const adminSettingsRoute = createRoute({
 // 5. Route Tree
 // ─────────────────────────────────────────────
 const routeTree = rootRoute.addChildren([
-  // Public — no auth (user)
-  publicLayout.addChildren([
-    loginRoute,
-    registerRoute,
-    verifyRoute,
-    requestJoinProgramRoute,
-    joinProgramRoute,
-  ]),
+  // Index redirect route
+  indexRoute,
 
-  // Public — no auth (admin)
-  adminPublicLayout.addChildren([adminLoginRoute]),
+  // Public — no auth
+  loginRoute,
+  registerRoute,
+  verifyRoute,
+  requestJoinProgramRoute,
+  joinProgramRoute,
+  adminLoginRoute,
+  forgotPasswordRoute,
+  resetPasswordRoute,
 
   // Authenticated users
   userLayout.addChildren([
