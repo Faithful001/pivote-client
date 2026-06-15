@@ -8,6 +8,7 @@ import {
 import { Toaster } from "sonner";
 
 // Page imports
+import LandingPage from "./pages/landing";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Verify from "./pages/verify";
@@ -24,6 +25,11 @@ import ResetPassword from "./pages/reset-password";
 
 // Admin page imports
 import AdminLogin from "./pages/admin/login";
+import AdminRegister from "./pages/admin/register";
+import AdminVerify from "./pages/admin/verify";
+import AdminCreateWorkspace from "./pages/admin/create-workspace";
+import AdminForgotPassword from "./pages/admin/forgot-password";
+import AdminResetPassword from "./pages/admin/reset-password";
 import AdminPrograms from "./pages/admin/programs";
 import AdminCandidates from "./pages/admin/candidates";
 import AdminCreateProgram from "./pages/admin/programs/create";
@@ -54,21 +60,25 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
   beforeLoad: () => {
+    // If already logged in, send them to the right dashboard
     const token = localStorage.getItem("token");
     const userJson = localStorage.getItem("user");
-    if (!token) {
-      throw redirect({ to: "/login" });
-    }
-    if (userJson) {
+    if (token && userJson) {
+      let user: any = null;
       try {
-        const user = JSON.parse(userJson);
-        if (user.role === "admin") {
-          throw redirect({ to: "/admin/dashboard" });
-        }
-      } catch (e) {}
+        user = JSON.parse(userJson);
+      } catch {
+        // Malformed JSON — ignore and show landing page
+      }
+      if (user?.role === "admin") {
+        throw redirect({ to: "/admin/dashboard" });
+      } else if (user) {
+        throw redirect({ to: "/dashboard" });
+      }
     }
-    throw redirect({ to: "/dashboard" });
+    // Unauthenticated visitors see the landing page
   },
+  component: LandingPage,
 });
 
 const loginRoute = createRoute({
@@ -180,10 +190,55 @@ const programDashboardRoute = createRoute({
   component: ProgramDashboard,
 });
 
+// ─────────────────────────────────────────────
+// 4a. Admin Public/Onboarding Routes  (no sidebar)
+//     These are standalone pages — no AdminLayout wrapper.
+// ─────────────────────────────────────────────
+const adminRegisterRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/register",
+  component: AdminRegister,
+});
+
 const adminLoginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/admin/login",
   component: AdminLogin,
+  validateSearch: (search: Record<string, unknown>): { email?: string } =>
+    typeof search.email === "string" ? { email: search.email } : {},
+});
+
+const adminVerifyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/verify",
+  component: AdminVerify,
+  validateSearch: (search: Record<string, unknown>): { email?: string } =>
+    typeof search.email === "string" ? { email: search.email } : {},
+});
+
+const adminCreateWorkspaceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/create-workspace",
+  component: AdminCreateWorkspace,
+  beforeLoad: () => {
+    if (!localStorage.getItem("token")) {
+      throw redirect({ to: "/admin/login" });
+    }
+  },
+});
+
+const adminForgotPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/forgot-password",
+  component: AdminForgotPassword,
+});
+
+const adminResetPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/reset-password",
+  component: AdminResetPassword,
+  validateSearch: (search: Record<string, unknown>): { email?: string } =>
+    typeof search.email === "string" ? { email: search.email } : {},
 });
 
 // ─────────────────────────────────────────────
@@ -256,20 +311,27 @@ const adminSettingsRoute = createRoute({
 // 5. Route Tree
 // ─────────────────────────────────────────────
 const routeTree = rootRoute.addChildren([
-  // Index redirect route
+  // Landing page (public, redirects logged-in users)
   indexRoute,
 
-  // Public — no auth
+  // Voter public routes
   loginRoute,
   registerRoute,
   verifyRoute,
   requestJoinProgramRoute,
   joinProgramRoute,
-  adminLoginRoute,
   forgotPasswordRoute,
   resetPasswordRoute,
 
-  // Authenticated users
+  // Admin public / onboarding routes (no sidebar)
+  adminLoginRoute,
+  adminRegisterRoute,
+  adminVerifyRoute,
+  adminCreateWorkspaceRoute,
+  adminForgotPasswordRoute,
+  adminResetPasswordRoute,
+
+  // Authenticated user routes
   userLayout.addChildren([
     dashboardRoute,
     voteRoute,
@@ -279,7 +341,7 @@ const routeTree = rootRoute.addChildren([
     programDashboardRoute,
   ]),
 
-  // Admin only (/admin/*)
+  // Admin only (/admin/*) — protected with sidebar
   adminLayout.addChildren([
     adminDashboardRoute,
     adminCreateProgramRoute,

@@ -9,7 +9,7 @@ import { useMe } from "../../../api/auth";
 
 export default function ProgramDashboard() {
   const { data: user } = useMe();
-  const { programId } = useParams({ from: "/programs/$programId" });
+  const { programId } = useParams({ strict: false }) as { programId: string };
 
   const { data: program, isLoading: loadingProgram } = useProgram(programId);
   const { data: candidates, isLoading: loadingCandidates } = useCandidatesByProgram(programId);

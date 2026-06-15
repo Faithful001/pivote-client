@@ -2,8 +2,6 @@
 
 @import "tailwindcss";
 
-@import "@radix-ui/themes/styles.css";
-
 @theme {
   --color-navy-50: #f2f5fa;
   --color-navy-100: #e3ebf5;

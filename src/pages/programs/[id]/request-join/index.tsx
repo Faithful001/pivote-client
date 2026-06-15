@@ -7,9 +7,18 @@ import { toast } from "sonner";
 export default function RequestJoinProgram() {
   const [email, setEmail] = useState("");
   const { programId } = useParams({ from: "/programs/$programId/request-join" });
-  const { name = "", workspace_name = "", program_name = "", workspace_id = "" } = useSearch({ from: "/programs/$programId/request-join" });
+  const {
+    name = "",
+    workspace_name = "",
+    program_name = "",
+    workspace_id = "",
+  } = useSearch({ from: "/programs/$programId/request-join" });
 
-  const resolvedProgramName = program_name ? decodeURIComponent(program_name) : (name ? decodeURIComponent(name) : "the program");
+  const resolvedProgramName = program_name
+    ? decodeURIComponent(program_name)
+    : name
+      ? decodeURIComponent(name)
+      : "the program";
   const resolvedWorkspaceName = workspace_name ? decodeURIComponent(workspace_name) : "";
 
   const requestJoinMutation = useRequestJoinProgram();
@@ -32,14 +41,16 @@ export default function RequestJoinProgram() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-800 flex items-center justify-center p-6">
-      <div className="w-full max-w-[460px] flex flex-col items-center">
-        {/* Top Logo Icon */}
-        <div className="mb-4 flex items-center gap-2">
-          <FiCheckSquare className="w-10 h-10 text-amber-500" />
-          <p className="text-2xl font-bold">PIVOTE</p>
-        </div>
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex items-center justify-center p-6">
+      {/* Fixed top-left logo */}
+      <div className="fixed top-0 left-0 p-5 z-50 flex items-center gap-2">
+        <Link to="/" className="fixed top-0 left-0 p-5 z-50 flex items-center gap-2">
+          <FiCheckSquare className="w-6 h-6 text-amber-500" />
+          <span className="text-lg font-bold text-[#0d1e43] tracking-wide">PIVOTE</span>
+        </Link>
+      </div>
 
+      <div className="w-full max-w-[500px] bg-white rounded-2xl border border-slate-200/60 p-8 flex flex-col items-center">
         {/* Header Text */}
         <h1 className="text-3xl font-extrabold text-[#0d1e43] mb-2 tracking-tight text-center">
           You've Been Invited
@@ -47,12 +58,13 @@ export default function RequestJoinProgram() {
 
         <div className="text-center mb-8">
           <p className="text-slate-500 text-[13px] leading-relaxed">
-            Confirm your email to join {resolvedWorkspaceName ? `the ${resolvedWorkspaceName} workspace` : "the program"}.
+            Confirm your email to join{" "}
+            {resolvedWorkspaceName ? `the ${resolvedWorkspaceName} workspace` : "the program"}.
           </p>
         </div>
 
         {/* Program Info Panel */}
-        <div className="w-full bg-[#f9fafb] border border-slate-200 rounded-md p-5 mb-6 space-y-3">
+        <div className="w-full bg-[#f9fafb] border border-slate-200 rounded-xl p-5 mb-6 space-y-3">
           {resolvedWorkspaceName && (
             <div>
               <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
@@ -81,7 +93,7 @@ export default function RequestJoinProgram() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email address"
-              className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 px-4 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
+              className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-xl py-3.5 px-4 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
             />
           </div>
 
@@ -90,7 +102,7 @@ export default function RequestJoinProgram() {
             id="confirm-request-join-btn"
             type="submit"
             disabled={requestJoinMutation.isPending}
-            className="w-full bg-[#10b981] hover:bg-emerald-600 disabled:opacity-60 text-white font-bold py-3.5 px-4 rounded-md transition duration-150 flex items-center justify-center gap-2 mt-6 text-[15px]"
+            className="w-full bg-[#10b981] hover:bg-emerald-600 disabled:opacity-60 text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 flex items-center justify-center gap-2 mt-6 text-[15px]"
           >
             {requestJoinMutation.isPending ? (
               <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />

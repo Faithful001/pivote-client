@@ -1,20 +1,15 @@
 import React, { useState } from "react";
-import { useVerifyAccount } from "../../api/auth";
+import { useVerifyAccount } from "../../../api/auth";
 import { toast } from "sonner";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { FiCheckSquare } from "react-icons/fi";
-import { useRequestJoinProgram } from "../../api/program";
-import { getErrorMessage } from "../../lib/utils/get-error-message.util";
 
-export default function Verify() {
+export default function AdminVerify() {
   const search = useSearch({ strict: false }) as Record<string, string>;
   const [email, setEmail] = useState(search?.email || "");
   const [otp, setOtp] = useState("");
   const verifyMutation = useVerifyAccount();
-  const requestJoinMutation = useRequestJoinProgram();
   const navigate = useNavigate();
-
-  const isFromInvite = !!search?.program_id;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,27 +24,11 @@ export default function Verify() {
       {
         onSuccess: (data) => {
           if (data.success) {
-            toast.success("Account verified successfully!");
-
-            if (isFromInvite) {
-              requestJoinMutation.mutate(
-                { id: search.program_id, email, workspace_id: search.workspace_id },
-                {
-                  onSuccess: () => {
-                    toast.success("Join link sent! Check your email.");
-                    setTimeout(() => {
-                      navigate({ to: "/login" });
-                    }, 2000);
-                  },
-                  onError: (err: any) => {
-                    const errorMessage = getErrorMessage(err);
-                    toast.error(errorMessage);
-                  },
-                }
-              );
-            } else {
-              navigate({ to: "/login" });
-            }
+            toast.success("Admin account verified successfully! Please log in.");
+            navigate({
+              to: "/admin/login",
+              search: { email },
+            });
           } else {
             toast.error(data.message || "Verification failed");
           }
@@ -73,23 +52,30 @@ export default function Verify() {
       </div>
 
       <div className="w-full max-w-[500px] bg-white rounded-2xl border border-slate-200/60 p-8 flex flex-col items-center">
+        {/* Progress Steps */}
+        <div className="w-full flex items-center gap-2 mb-6">
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">
+              ✓
+            </div>
+            <span className="text-xs font-semibold text-emerald-500">Register</span>
+          </div>
+          <div className="flex-1 h-px bg-emerald-200" />
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-full bg-[#0d1e43] flex items-center justify-center text-white text-xs font-bold">
+              2
+            </div>
+            <span className="text-xs font-semibold text-[#0d1e43]">Verify Email</span>
+          </div>
+        </div>
+
         {/* Header Text */}
         <h1 className="text-3xl font-extrabold text-[#0d1e43] mb-2 tracking-tight text-center">
-          {isFromInvite ? "Verify & Join" : "Verify Account"}
+          Verify Admin Account
         </h1>
-
-        {isFromInvite ? (
-          <div className="text-center mb-8">
-            <p className="text-slate-500 text-[13px] leading-relaxed">
-              Verify your email to complete joining{" "}
-              <strong className="text-[#0d1e43]">{search.program_name}</strong>.
-            </p>
-          </div>
-        ) : (
-          <p className="text-slate-500 text-[13px] text-center max-w-[340px] leading-relaxed mb-8">
-            Verify your email address to activate your account and start voting
-          </p>
-        )}
+        <p className="text-slate-500 text-[13px] text-center max-w-[340px] leading-relaxed mb-8">
+          We sent a 4-digit OTP to your email. Enter it below to verify your admin account.
+        </p>
 
         {/* Verify Form */}
         <form onSubmit={handleSubmit} className="w-full space-y-5">
@@ -128,17 +114,13 @@ export default function Verify() {
           {/* Submit button */}
           <button
             type="submit"
-            disabled={verifyMutation.isPending || requestJoinMutation.isPending}
+            disabled={verifyMutation.isPending}
             className="w-full bg-[#10b981] hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 flex items-center justify-center gap-2 mt-6 text-[15px]"
           >
             {verifyMutation.isPending ? (
               <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-            ) : requestJoinMutation.isPending ? (
-              "Sending join link..."
-            ) : isFromInvite ? (
-              "Verify & Join Program"
             ) : (
-              "Verify Account"
+              "Verify Admin Account"
             )}
           </button>
         </form>

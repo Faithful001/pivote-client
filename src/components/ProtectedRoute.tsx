@@ -42,7 +42,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
   // Show spinner while token is present but user is still loading
   if (!token || isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-300">
+      <div className="min-h-screen bg-white flex items-center justify-center text-slate-300">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-emerald-500"></div>
       </div>
     );

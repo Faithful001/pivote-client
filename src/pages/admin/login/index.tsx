@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useLogin } from "../../../api/auth";
 import { toast } from "sonner";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { FiCheckSquare, FiEye, FiEyeOff } from "react-icons/fi";
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState("");
+  const search = useSearch({ strict: false }) as Record<string, string>;
+  const [email, setEmail] = useState(search?.email || "");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
@@ -22,16 +23,36 @@ export default function AdminLogin() {
     loginMutation.mutate(
       { email, password },
       {
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
           if (data.success) {
             const role = data.data?.user?.role;
             if (role !== "admin") {
-              toast.error("Invalid credentials");
+              toast.error("Access denied. Admin credentials required.");
               localStorage.removeItem("token");
               return;
             }
+
             toast.success("Welcome back, Admin!");
-            navigate({ to: "/admin/dashboard" });
+
+            // Check if this admin already has a workspace
+            // We use the token that was just set by the useLogin mutation
+            try {
+              const { apiClient } = await import("../../../api/client");
+              const res = await apiClient.get<{ data: any[] }>("/workspaces");
+              const workspaces = res.data?.data || [];
+              if (workspaces.length === 0) {
+                navigate({ to: "/admin/create-workspace" });
+              } else {
+                // Cache the workspace locally
+                const ws = workspaces[0];
+                localStorage.setItem("workspace_id", ws.id);
+                localStorage.setItem("workspace", JSON.stringify(ws));
+                navigate({ to: "/admin/dashboard" });
+              }
+            } catch {
+              // If workspace check fails, just go to dashboard (AdminLayout will handle redirect)
+              navigate({ to: "/admin/dashboard" });
+            }
           } else {
             toast.error(data.message || "Login failed");
           }
@@ -45,20 +66,22 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-800 flex items-center justify-center p-6">
-      <div className="w-full max-w-[460px] flex flex-col items-center">
-        {/* Top Logo Icon */}
-        <div className="mb-4 flex items-center gap-2">
-          <FiCheckSquare className="w-10 h-10 text-amber-500" />
-          <p className="text-2xl font-bold">PIVOTE</p>
-        </div>
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex items-center justify-center p-6">
+      {/* Fixed top-left logo */}
+      <div className="fixed top-0 left-0 p-5 z-50 flex items-center gap-2">
+        <Link to="/" className="fixed top-0 left-0 p-5 z-50 flex items-center gap-2">
+          <FiCheckSquare className="w-6 h-6 text-amber-500" />
+          <span className="text-lg font-bold text-[#0d1e43] tracking-wide">PIVOTE</span>
+        </Link>
+      </div>
 
+      <div className="w-full max-w-[500px] bg-white rounded-2xl border border-slate-200/60 p-8 flex flex-col items-center">
         {/* Header Text */}
         <h1 className="text-3xl font-extrabold text-[#0d1e43] mb-2 tracking-tight text-center">
-          Welcome Back Admin!
+          Admin Portal
         </h1>
         <p className="text-slate-500 text-[13px] text-center max-w-[340px] leading-relaxed mb-8">
-          Welcome back to Pivote Admin Portal, please log into manage the online voting system
+          Sign in to manage your workspace, programs, and elections.
         </p>
 
         {/* Login Form */}
@@ -73,22 +96,30 @@ export default function AdminLogin() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email address"
-              className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 px-4 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
+              className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-xl py-3.5 px-4 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
             />
           </div>
 
           {/* Password field */}
           <div className="space-y-2">
-            <label className="block text-[14px] font-semibold text-[#0d1e43] text-left">
-              Password
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-[14px] font-semibold text-[#0d1e43] text-left">
+                Password
+              </label>
+              <Link
+                to="/admin/forgot-password"
+                className="text-[#10b981] hover:text-emerald-600 text-xs font-semibold hover:underline"
+              >
+                Forgot Password?
+              </Link>
+            </div>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••"
-                className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 pl-4 pr-10 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
+                className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-xl py-3.5 pl-4 pr-10 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
               />
               <button
                 type="button"
@@ -100,30 +131,37 @@ export default function AdminLogin() {
             </div>
           </div>
 
-          {/* Forgot Password mock link */}
-          {/* <div className="flex justify-end pt-1">
-            <button
-              type="button"
-              onClick={() => toast.info("Password reset must be requested from the super admin.")}
-              className="text-[#10b981] hover:text-emerald-600 text-xs font-semibold hover:underline"
-            >
-              Forgot Password
-            </button>
-          </div> */}
-
           {/* Submit button */}
           <button
             type="submit"
             disabled={loginMutation.isPending}
-            className="w-full bg-[#10b981] hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-md transition duration-150 flex items-center justify-center gap-2 mt-4 text-[15px]"
+            className="w-full bg-[#10b981] hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 flex items-center justify-center gap-2 mt-4 text-[15px]"
           >
             {loginMutation.isPending ? (
               <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
             ) : (
-              "Log In"
+              "Sign In"
             )}
           </button>
         </form>
+
+        {/* Divider */}
+        <div className="w-full flex items-center gap-3 my-6">
+          <div className="flex-1 h-px bg-slate-100" />
+          <span className="text-xs text-slate-400 font-medium">or</span>
+          <div className="flex-1 h-px bg-slate-100" />
+        </div>
+
+        {/* Register Link */}
+        <div className="text-center text-sm text-slate-500">
+          Don't have an account?{" "}
+          <Link
+            to="/admin/register"
+            className="text-[#10b981] hover:text-emerald-600 font-semibold hover:underline"
+          >
+            Get Started
+          </Link>
+        </div>
       </div>
     </div>
   );

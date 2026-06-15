@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useForgotPassword } from "../../api/auth";
+import { useForgotPassword } from "../../../api/auth";
 import { toast } from "sonner";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { FiCheckSquare } from "react-icons/fi";
 
-export default function ForgotPassword() {
+export default function AdminForgotPassword() {
   const [email, setEmail] = useState("");
   const forgotPasswordMutation = useForgotPassword();
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ export default function ForgotPassword() {
           if (data.success) {
             toast.success("Verification code sent to your email!");
             navigate({
-              to: "/reset-password",
+              to: "/admin/reset-password",
               search: { email },
             });
           } else {
@@ -42,12 +42,12 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex items-center justify-center p-6">
       {/* Fixed top-left logo */}
-      <div className="fixed top-0 left-0 p-5 z-50 flex items-center gap-2">
+      <Link to="/" className="fixed top-0 left-0 p-5 z-50 flex items-center gap-2">
         <Link to="/" className="fixed top-0 left-0 p-5 z-50 flex items-center gap-2">
           <FiCheckSquare className="w-6 h-6 text-amber-500" />
           <span className="text-lg font-bold text-[#0d1e43] tracking-wide">PIVOTE</span>
         </Link>
-      </div>
+      </Link>
 
       <div className="w-full max-w-[500px] bg-white rounded-2xl border border-slate-200/60 p-8 flex flex-col items-center">
         {/* Header Text */}
@@ -55,12 +55,12 @@ export default function ForgotPassword() {
           Forgot Password
         </h1>
         <p className="text-slate-500 text-[13px] text-center max-w-[340px] leading-relaxed mb-8">
-          Enter your email address to receive a 4-digit verification code to reset your password
+          Enter your admin email address to receive a 4-digit verification code to reset your
+          password.
         </p>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="w-full space-y-5">
-          {/* Email field */}
           <div className="space-y-2">
             <label className="block text-[14px] font-semibold text-[#0d1e43] text-left">
               Email Address
@@ -74,7 +74,6 @@ export default function ForgotPassword() {
             />
           </div>
 
-          {/* Submit button */}
           <button
             type="submit"
             disabled={forgotPasswordMutation.isPending}
@@ -92,7 +91,7 @@ export default function ForgotPassword() {
         <div className="text-center mt-6 text-sm text-slate-500">
           Remember your password?{" "}
           <Link
-            to="/login"
+            to="/admin/login"
             className="text-[#10b981] hover:text-emerald-600 font-semibold hover:underline"
           >
             Back to login

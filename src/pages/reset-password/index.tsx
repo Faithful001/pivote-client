@@ -54,14 +54,16 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-800 flex items-center justify-center p-6">
-      <div className="w-full max-w-[460px] flex flex-col items-center">
-        {/* Top Logo Icon */}
-        <div className="mb-4 flex items-center gap-2">
-          <FiCheckSquare className="w-10 h-10 text-amber-500" />
-          <p className="text-2xl font-bold">PIVOTE</p>
-        </div>
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex items-center justify-center p-6">
+      {/* Fixed top-left logo */}
+      <div className="fixed top-0 left-0 p-5 z-50 flex items-center gap-2">
+        <Link to="/" className="fixed top-0 left-0 p-5 z-50 flex items-center gap-2">
+          <FiCheckSquare className="w-6 h-6 text-amber-500" />
+          <span className="text-lg font-bold text-[#0d1e43] tracking-wide">PIVOTE</span>
+        </Link>
+      </div>
 
+      <div className="w-full max-w-[500px] bg-white rounded-2xl border border-slate-200/60 p-8 flex flex-col items-center">
         {/* Header Text */}
         <h1 className="text-3xl font-extrabold text-[#0d1e43] mb-2 tracking-tight text-center">
           Reset Password
@@ -83,7 +85,7 @@ export default function ResetPassword() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email address"
               readOnly={!!search?.email}
-              className={`w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 px-4 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none ${
+              className={`w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-xl py-3.5 px-4 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none ${
                 search?.email ? "opacity-60 cursor-not-allowed" : ""
               }`}
             />
@@ -100,7 +102,7 @@ export default function ResetPassword() {
               onChange={(e) => setOtp(e.target.value)}
               placeholder="1234"
               maxLength={4}
-              className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 px-4 text-slate-800 text-center tracking-widest font-bold text-lg placeholder-slate-300 transition duration-150 outline-none"
+              className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-xl py-3.5 px-4 text-slate-800 text-center tracking-widest font-bold text-lg placeholder-slate-300 transition duration-150 outline-none"
             />
           </div>
 
@@ -115,7 +117,7 @@ export default function ResetPassword() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••"
-                className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 pl-4 pr-10 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
+                className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-xl py-3.5 pl-4 pr-10 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
               />
               <button
                 type="button"
@@ -138,14 +140,18 @@ export default function ResetPassword() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••"
-                className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-md py-3.5 pl-4 pr-10 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
+                className="w-full bg-[#f9fafb] border border-slate-200 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] rounded-xl py-3.5 pl-4 pr-10 text-slate-800 text-sm placeholder-slate-300 transition duration-150 outline-none"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none flex items-center justify-center"
               >
-                {showConfirmPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+                {showConfirmPassword ? (
+                  <FiEyeOff className="w-5 h-5" />
+                ) : (
+                  <FiEye className="w-5 h-5" />
+                )}
               </button>
             </div>
           </div>
@@ -154,7 +160,7 @@ export default function ResetPassword() {
           <button
             type="submit"
             disabled={resetPasswordMutation.isPending}
-            className="w-full bg-[#10b981] hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-md transition duration-150 flex items-center justify-center gap-2 mt-6 text-[15px]"
+            className="w-full bg-[#10b981] hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 flex items-center justify-center gap-2 mt-6 text-[15px]"
           >
             {resetPasswordMutation.isPending ? (
               <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
@@ -167,7 +173,10 @@ export default function ResetPassword() {
         {/* Back Link */}
         <div className="text-center mt-6 text-sm text-slate-500">
           Remember your password?{" "}
-          <Link to="/login" className="text-[#10b981] hover:text-emerald-600 font-semibold hover:underline">
+          <Link
+            to="/login"
+            className="text-[#10b981] hover:text-emerald-600 font-semibold hover:underline"
+          >
             Back to login
           </Link>
         </div>

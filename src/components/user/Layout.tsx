@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { useMe } from "../../api/auth";
+// import { useMe } from "../../api/auth";
 import {
   FiGrid,
   FiCheckSquare,
@@ -8,17 +8,15 @@ import {
   FiBookOpen,
   FiSettings,
   FiLogOut,
-  FiUsers,
 } from "react-icons/fi";
 import { toast } from "sonner";
-import { LiaVoteYeaSolid } from "react-icons/lia";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const { data: user, isLoading } = useMe();
+  // const { data: user, isLoading } = useMe();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,19 +37,13 @@ export default function Layout({ children }: LayoutProps) {
     { label: "Settings", path: "/settings", icon: FiSettings },
   ];
 
-  // Add Admin-only links if user is admin
-  if (user?.role === "admin") {
-    navItems.push({ label: "Programs", path: "/admin/programs", icon: LiaVoteYeaSolid });
-    navItems.push({ label: "Candidates", path: "/admin/candidates", icon: FiUsers });
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-300">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-emerald-500"></div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-300">
+  //       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-emerald-500"></div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -101,7 +93,7 @@ export default function Layout({ children }: LayoutProps) {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 min-h-screen pl-64 bg-[#f8fafc]">
+      <main className="flex-1 pl-64 bg-[#f8fafc]">
         <div className="p-10 max-w-7xl mx-auto">{children}</div>
       </main>
     </div>

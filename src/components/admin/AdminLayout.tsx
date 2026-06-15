@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useMe } from "../../api/auth";
 import { useQueryClient } from "@tanstack/react-query";
-import { useWorkspaces, useCreateWorkspace, type Workspace } from "../../api/workspace";
-import Modal from "../shared/modals";
+import { useCreateWorkspace, useWorkspaces, type Workspace } from "../../api/workspace";
 import {
   FiGrid,
   FiCheckSquare,
@@ -16,6 +15,7 @@ import {
 } from "react-icons/fi";
 import { toast } from "sonner";
 import { LiaVoteYeaSolid } from "react-icons/lia";
+import Modal from "../shared/modals";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -31,8 +31,28 @@ export default function Layout({ children }: LayoutProps) {
   const [isCreateWorkspaceModalOpen, setIsCreateWorkspaceModalOpen] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
 
-  const { data: workspaces } = useWorkspaces({ enabled: user?.role === "admin" });
+  const { data: workspaces, isLoading: isLoadingWorkspaces } = useWorkspaces({
+    enabled: user?.role === "admin",
+  });
+
   const createWorkspaceMutation = useCreateWorkspace();
+
+  const hasNoWorkspace = user?.role === "admin" && workspaces && workspaces.length === 0;
+
+  const isOnboarding =
+    location.pathname === "/admin/register" ||
+    location.pathname === "/admin/verify" ||
+    location.pathname === "/admin/login" ||
+    location.pathname === "/admin/forgot-password" ||
+    location.pathname === "/admin/reset-password";
+
+  useEffect(() => {
+    if (hasNoWorkspace) {
+      if (!isOnboarding) {
+        setIsCreateWorkspaceModalOpen(true);
+      }
+    }
+  }, [hasNoWorkspace, isOnboarding]);
 
   const currentWorkspaceId = localStorage.getItem("workspace_id");
   const workspaceObjStr = localStorage.getItem("workspace");
@@ -42,6 +62,25 @@ export default function Layout({ children }: LayoutProps) {
       currentWorkspaceName = JSON.parse(workspaceObjStr).name || "";
     } catch (e) {}
   }
+
+  // Sync missing workspace data into localStorage
+  useEffect(() => {
+    if (!currentWorkspaceId || !workspaceObjStr) {
+      if (!currentWorkspaceId && workspaceObjStr) {
+        try {
+          const ws = JSON.parse(workspaceObjStr);
+          localStorage.setItem("workspace_id", ws.id);
+        } catch (e) {}
+      } else if (currentWorkspaceId && !workspaceObjStr) {
+        try {
+          const ws = workspaces?.find((ws) => ws.id === currentWorkspaceId);
+          if (ws) {
+            localStorage.setItem("workspace", JSON.stringify(ws));
+          }
+        } catch (e) {}
+      }
+    }
+  }, [currentWorkspaceId, workspaceObjStr, workspaces]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -61,8 +100,6 @@ export default function Layout({ children }: LayoutProps) {
     queryClient.invalidateQueries();
 
     toast.success(`Switched to workspace: ${ws.name}`);
-
-    // Redirect to home dashboard of the new workspace
     navigate({ to: "/admin/dashboard" });
   };
 
@@ -94,9 +131,9 @@ export default function Layout({ children }: LayoutProps) {
     { label: "Settings", path: "/admin/settings", icon: FiSettings },
   ];
 
-  if (isLoading) {
+  if (isLoading || (user?.role === "admin" && isLoadingWorkspaces)) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-300">
+      <div className="min-h-screen bg-white flex items-center justify-center text-slate-300">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-emerald-500"></div>
       </div>
     );
@@ -104,59 +141,56 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
-      {/* Sidebar: Deep Navy matching screenshot */}
+      {/* Sidebar */}
       <aside className="w-64 bg-[#0d1e43] text-slate-100 flex flex-col justify-between shrink-0 shadow-xl fixed h-screen z-10">
         <div className="flex flex-col">
-          {/* Logo Brand area with Switcher */}
+          {/* Logo Brand area with Workspace Switcher */}
           <div className="py-4 border-b border-white/5 px-6 flex flex-col justify-center gap-1.5 relative">
             <div className="flex items-center gap-2 font-bold text-lg tracking-wider text-emerald-400">
               <FiCheckSquare className="w-5 h-5" />
               PIVOTE
             </div>
+            <div className="relative mt-1">
+              <button
+                onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
+                className="flex items-center justify-between w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-white/10 transition"
+              >
+                <span className="truncate">{currentWorkspaceName || "Select Workspace"}</span>
+                <FiChevronDown className="w-3.5 h-3.5 ml-1 flex-shrink-0" />
+              </button>
 
-            {user?.role === "admin" && (
-              <div className="relative mt-1">
-                <button
-                  onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
-                  className="flex items-center justify-between w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-white/10 transition"
-                >
-                  <span className="truncate">{currentWorkspaceName || "Select Workspace"}</span>
-                  <FiChevronDown className="w-3.5 h-3.5 ml-1 flex-shrink-0" />
-                </button>
-
-                {isWorkspaceDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1 z-50">
-                    <div className="max-h-40 overflow-y-auto">
-                      {workspaces?.map((ws) => (
-                        <button
-                          key={ws.id}
-                          onClick={() => handleSelectWorkspace(ws)}
-                          className={`flex items-center w-full px-3 py-2 text-left text-xs hover:bg-white/5 transition ${
-                            ws.id === currentWorkspaceId
-                              ? "text-emerald-400 font-bold"
-                              : "text-slate-300"
-                          }`}
-                        >
-                          {ws.name}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="border-t border-slate-700 mt-1 pt-1">
+              {isWorkspaceDropdownOpen && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1 z-50">
+                  <div className="max-h-40 overflow-y-auto">
+                    {workspaces?.map((ws) => (
                       <button
-                        onClick={() => {
-                          setIsWorkspaceDropdownOpen(false);
-                          setIsCreateWorkspaceModalOpen(true);
-                        }}
-                        className="flex items-center gap-1.5 w-full px-3 py-2 text-left text-xs text-emerald-400 hover:bg-white/5 transition font-semibold"
+                        key={ws.id}
+                        onClick={() => handleSelectWorkspace(ws)}
+                        className={`flex items-center w-full px-3 py-2 text-left text-xs hover:bg-white/5 transition ${
+                          ws.id === currentWorkspaceId
+                            ? "text-emerald-400 font-bold"
+                            : "text-slate-300"
+                        }`}
                       >
-                        <FiPlus className="w-3.5 h-3.5" />
-                        Create Workspace
+                        {ws.name}
                       </button>
-                    </div>
+                    ))}
                   </div>
-                )}
-              </div>
-            )}
+                  <div className="border-t border-slate-700 mt-1 pt-1">
+                    <button
+                      onClick={() => {
+                        setIsWorkspaceDropdownOpen(false);
+                        setIsCreateWorkspaceModalOpen(true);
+                      }}
+                      className="flex items-center gap-1.5 w-full px-3 py-2 text-left text-xs text-emerald-400 hover:bg-white/5 transition font-semibold"
+                    >
+                      <FiPlus className="w-3.5 h-3.5" />
+                      Create Workspace
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Navigation Links */}
@@ -194,7 +228,7 @@ export default function Layout({ children }: LayoutProps) {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 min-h-screen pl-64 bg-[#f8fafc]">
+      <main className="flex-1 pl-64 bg-[#f8fafc]">
         <div className="p-10 max-w-7xl mx-auto">{children}</div>
       </main>
 
@@ -202,6 +236,7 @@ export default function Layout({ children }: LayoutProps) {
       <Modal
         open={isCreateWorkspaceModalOpen}
         onOpenChange={setIsCreateWorkspaceModalOpen}
+        closable={!hasNoWorkspace}
         title="Create New Workspace"
       >
         <form onSubmit={handleCreateWorkspace} className="space-y-4">
@@ -221,7 +256,9 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex gap-4 pt-2">
             <button
               type="button"
-              onClick={() => setIsCreateWorkspaceModalOpen(false)}
+              onClick={() => {
+                if (!hasNoWorkspace) setIsCreateWorkspaceModalOpen(false);
+              }}
               className="w-1/2 border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold py-3 rounded-xl transition"
             >
               Cancel

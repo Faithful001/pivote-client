@@ -33,14 +33,9 @@ export const useMe = () => {
   return useQuery<User, Error>({
     queryKey: ["me"],
     queryFn: async () => {
-      const workspaceId = localStorage.getItem("workspace_id");
-      const url = workspaceId ? `/users/me?workspace_id=${workspaceId}` : "/users/me";
-      const response = await apiClient.get<ApiResponse<{ user: User; workspace: any }>>(url);
-      const { user, workspace } = response.data.data;
-      if (workspace) {
-        localStorage.setItem("workspace_id", workspace.id);
-        localStorage.setItem("workspace", JSON.stringify(workspace));
-      }
+      const url = `/users/me`;
+      const response = await apiClient.get<ApiResponse<User>>(url);
+      const user = response.data.data;
       localStorage.setItem("user", JSON.stringify(user));
       return user;
     },
@@ -74,6 +69,17 @@ export const useRegister = () => {
     },
   });
 };
+
+// Admin Register mutation
+export const useAdminRegister = () => {
+  return useMutation({
+    mutationFn: async (userData: Record<string, string>) => {
+      const response = await apiClient.post<ApiResponse<User>>("/auth/admin/register", userData);
+      return response.data;
+    },
+  });
+};
+
 
 // Verify account OTP mutation
 export const useVerifyAccount = () => {
