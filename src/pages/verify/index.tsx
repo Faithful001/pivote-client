@@ -65,8 +65,16 @@ export default function Verify() {
           }
         },
         onError: (err: any) => {
-          const errMsg = err.response?.data?.message || err.message || "An error occurred";
-          toast.error(errMsg);
+          const error = err.response?.data?.message || err.message;
+          const errorMessage = error || "An error occurred";
+
+          if (error === "User already verified") {
+            navigate({
+              to: "/login",
+              search: { email },
+            });
+          }
+          toast.error(errorMessage);
         },
       }
     );
