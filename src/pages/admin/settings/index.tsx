@@ -44,7 +44,7 @@ export default function AdminSettings() {
   return (
     <div className="space-y-8 max-w-2xl">
       <div>
-        <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">Account Settings</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-[#0d1e43] mb-1">Account Settings</h1>
         <p className="text-slate-500 text-sm">Manage your profile details and preferences.</p>
       </div>
 

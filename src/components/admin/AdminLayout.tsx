@@ -12,6 +12,8 @@ import {
   FiChevronDown,
   FiPlus,
   FiUsers,
+  FiMenu,
+  FiX,
 } from "react-icons/fi";
 import { toast } from "sonner";
 import { LiaVoteYeaSolid } from "react-icons/lia";
@@ -27,6 +29,7 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const queryClient = useQueryClient();
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
   const [isCreateWorkspaceModalOpen, setIsCreateWorkspaceModalOpen] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
@@ -53,6 +56,11 @@ export default function Layout({ children }: LayoutProps) {
       }
     }
   }, [hasNoWorkspace, isOnboarding]);
+
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
 
   const currentWorkspaceId = localStorage.getItem("workspace_id");
   const workspaceObjStr = localStorage.getItem("workspace");
@@ -95,10 +103,7 @@ export default function Layout({ children }: LayoutProps) {
     localStorage.setItem("workspace_id", ws.id);
     localStorage.setItem("workspace", JSON.stringify(ws));
     setIsWorkspaceDropdownOpen(false);
-
-    // Invalidate react-query cache to force refetch of all queries
     queryClient.invalidateQueries();
-
     toast.success(`Switched to workspace: ${ws.name}`);
     navigate({ to: "/admin/dashboard" });
   };
@@ -139,97 +144,139 @@ export default function Layout({ children }: LayoutProps) {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-slate-50 flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#0d1e43] text-slate-100 flex flex-col justify-between shrink-0 shadow-xl fixed h-screen z-10">
-        <div className="flex flex-col">
-          {/* Logo Brand area with Workspace Switcher */}
-          <div className="py-4 border-b border-white/5 px-6 flex flex-col justify-center gap-1.5 relative">
+  const Sidebar = () => (
+    <aside className="w-64 bg-[#0d1e43] text-slate-100 flex flex-col justify-between h-full">
+      <div className="flex flex-col">
+        {/* Logo + close button on mobile */}
+        <div className="py-4 border-b border-white/5 px-6 flex flex-col justify-center gap-1.5 relative">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-bold text-lg tracking-wider text-emerald-400">
               <FiCheckSquare className="w-5 h-5" />
               PIVOTE
             </div>
-            <div className="relative mt-1">
-              <button
-                onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
-                className="flex items-center justify-between w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-white/10 transition"
-              >
-                <span className="truncate">{currentWorkspaceName || "Select Workspace"}</span>
-                <FiChevronDown className="w-3.5 h-3.5 ml-1 flex-shrink-0" />
-              </button>
-
-              {isWorkspaceDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1 z-50">
-                  <div className="max-h-40 overflow-y-auto">
-                    {workspaces?.map((ws) => (
-                      <button
-                        key={ws.id}
-                        onClick={() => handleSelectWorkspace(ws)}
-                        className={`flex items-center w-full px-3 py-2 text-left text-xs hover:bg-white/5 transition ${
-                          ws.id === currentWorkspaceId
-                            ? "text-emerald-400 font-bold"
-                            : "text-slate-300"
-                        }`}
-                      >
-                        {ws.name}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="border-t border-slate-700 mt-1 pt-1">
-                    <button
-                      onClick={() => {
-                        setIsWorkspaceDropdownOpen(false);
-                        setIsCreateWorkspaceModalOpen(true);
-                      }}
-                      className="flex items-center gap-1.5 w-full px-3 py-2 text-left text-xs text-emerald-400 hover:bg-white/5 transition font-semibold"
-                    >
-                      <FiPlus className="w-3.5 h-3.5" />
-                      Create Workspace
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="md:hidden text-slate-400 hover:text-white transition"
+            >
+              <FiX className="w-5 h-5" />
+            </button>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="mt-8 px-4 space-y-2">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.label}
-                  to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition duration-200 ${
-                    isActive
-                      ? "bg-emerald-500 text-white font-semibold shadow-lg shadow-emerald-500/10"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
+          {/* Workspace Switcher */}
+          <div className="relative mt-1">
+            <button
+              onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
+              className="flex items-center justify-between w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-white/10 transition"
+            >
+              <span className="truncate">{currentWorkspaceName || "Select Workspace"}</span>
+              <FiChevronDown className="w-3.5 h-3.5 ml-1 flex-shrink-0" />
+            </button>
+
+            {isWorkspaceDropdownOpen && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1 z-50">
+                <div className="max-h-40 overflow-y-auto">
+                  {workspaces?.map((ws) => (
+                    <button
+                      key={ws.id}
+                      onClick={() => handleSelectWorkspace(ws)}
+                      className={`flex items-center w-full px-3 py-2 text-left text-xs hover:bg-white/5 transition ${
+                        ws.id === currentWorkspaceId
+                          ? "text-emerald-400 font-bold"
+                          : "text-slate-300"
+                      }`}
+                    >
+                      {ws.name}
+                    </button>
+                  ))}
+                </div>
+                <div className="border-t border-slate-700 mt-1 pt-1">
+                  <button
+                    onClick={() => {
+                      setIsWorkspaceDropdownOpen(false);
+                      setIsCreateWorkspaceModalOpen(true);
+                    }}
+                    className="flex items-center gap-1.5 w-full px-3 py-2 text-left text-xs text-emerald-400 hover:bg-white/5 transition font-semibold"
+                  >
+                    <FiPlus className="w-3.5 h-3.5" />
+                    Create Workspace
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Logout area */}
-        <div className="p-4 border-t border-white/5">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition duration-200"
-          >
-            <FiLogOut className="w-5 h-5" />
-            Logout
-          </button>
+        {/* Navigation Links */}
+        <nav className="mt-8 px-4 space-y-2">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.label}
+                to={item.path}
+                className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition duration-200 ${
+                  isActive
+                    ? "bg-emerald-500 text-white font-semibold shadow-lg shadow-emerald-500/10"
+                    : "text-slate-300 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Logout area */}
+      <div className="p-4 border-t border-white/5">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition duration-200"
+        >
+          <FiLogOut className="w-5 h-5" />
+          Logout
+        </button>
+      </div>
+    </aside>
+  );
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:flex fixed h-screen w-64 z-10 shadow-xl">
+        <Sidebar />
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div className="md:hidden fixed inset-0 z-40 flex">
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-black/50" onClick={() => setIsSidebarOpen(false)} />
+          {/* Drawer */}
+          <div className="relative z-50 w-64 h-full shadow-xl">
+            <Sidebar />
+          </div>
         </div>
-      </aside>
+      )}
 
       {/* Main Content Area */}
-      <main className="flex-1 pl-64 bg-[#f8fafc]">
-        <div className="p-10 max-w-7xl mx-auto">{children}</div>
+      <main className="flex-1 md:pl-64 bg-[#f8fafc] min-h-screen">
+        {/* Mobile top bar */}
+        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0d1e43] shadow">
+          <div className="flex items-center gap-2 font-bold text-lg tracking-wider text-emerald-400">
+            <FiCheckSquare className="w-5 h-5" />
+            PIVOTE
+          </div>
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="text-slate-300 hover:text-white transition"
+          >
+            <FiMenu className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="p-4 md:p-10 max-w-7xl mx-auto">{children}</div>
       </main>
 
       {/* Create Workspace Modal */}

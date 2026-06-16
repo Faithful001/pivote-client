@@ -99,7 +99,9 @@ export default function AdminCandidates() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">Nominate Candidates</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#0d1e43] mb-1">
+            Nominate Candidates
+          </h1>
           <p className="text-slate-500 text-sm">
             Register new candidates to active election categories.
           </p>
@@ -110,7 +112,7 @@ export default function AdminCandidates() {
           className="bg-[#10b981] hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-2.5 px-5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-emerald-500/10"
         >
           <FiPlus className="w-5 h-5" />
-          Add Candidate
+          <span className="hidden sm:inline">Add Candidate</span>
         </button>
       </div>
 

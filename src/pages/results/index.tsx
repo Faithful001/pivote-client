@@ -34,7 +34,7 @@ export default function Results() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">Election Results</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-[#0d1e43] mb-1">Election Results</h1>
         <p className="text-slate-500 text-sm">
           Real-time statistics and tallies for all election categories.
         </p>

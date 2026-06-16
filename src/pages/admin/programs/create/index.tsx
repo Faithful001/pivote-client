@@ -156,8 +156,8 @@ export default function AdminCreateProgram() {
           <FiArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-3xl font-bold text-[#0d1e43]">Create Program</h1>
-          <p className="text-slate-500 text-sm mt-1">Set up your program, then add candidates.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#0d1e43] mb-1">Create Program</h1>
+          <p className="text-slate-500 text-sm">Set up your program, then add candidates.</p>
         </div>
       </div>
 

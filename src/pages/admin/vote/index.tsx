@@ -59,7 +59,7 @@ export default function AdminVote() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">Cast Your Vote</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-[#0d1e43] mb-1">Cast Your Vote</h1>
         <p className="text-slate-500 text-sm">
           Select a joined program to view candidates and place your vote.
         </p>

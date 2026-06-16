@@ -27,7 +27,7 @@ export default function Guidelines() {
   return (
     <div className="space-y-8 max-w-4xl">
       <div>
-        <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">Voters Guidelines</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-[#0d1e43] mb-1">Voters Guidelines</h1>
         <p className="text-slate-500 text-sm">
           Please read and understand the system guidelines before casting your vote.
         </p>

@@ -40,7 +40,6 @@ export default function AdminPrograms() {
   const [isDurationModalOpen, setIsDurationModalOpen] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
 
-  // duration state for the modal
   const [durationDays, setDurationDays] = useState(0);
   const [durationHours, setDurationHours] = useState(0);
   const [durationMinutes, setDurationMinutes] = useState(30);
@@ -90,7 +89,6 @@ export default function AdminPrograms() {
     });
   };
 
-  // toggle on - open duration modal instead of firing immediately
   const handleToggle = (prog: Program, checked: boolean) => {
     if (checked) {
       setSelectedProgram(prog);
@@ -99,7 +97,6 @@ export default function AdminPrograms() {
       setDurationMinutes(30);
       setIsDurationModalOpen(true);
     } else {
-      // toggle off - fire immediately with null voting_ends_at
       toggleMutation.mutate(
         { id: prog.id, is_active: false, voting_ends_at: null },
         {
@@ -143,7 +140,6 @@ export default function AdminPrograms() {
   };
 
   const handleDurationModalClose = (open: boolean) => {
-    // modal closed without saving — snap switch back to off
     if (!open) {
       setIsDurationModalOpen(false);
       setSelectedProgram(null);
@@ -151,23 +147,23 @@ export default function AdminPrograms() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">Manage Programs</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#0d1e43] mb-1">Manage Programs</h1>
           <p className="text-slate-500 text-sm">Create and organize election categories.</p>
         </div>
         <button
           onClick={() => navigate({ to: "/admin/programs/create" })}
-          className="bg-[#10b981] hover:bg-emerald-600 text-white font-semibold py-2.5 px-5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-emerald-500/10"
+          className="bg-[#10b981] hover:bg-emerald-600 text-white font-semibold py-2.5 px-4 md:px-5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-emerald-500/10 shrink-0"
         >
           <FiPlus className="w-5 h-5" />
-          Add Program
+          <span className="hidden sm:inline">Add Program</span>
         </button>
       </div>
 
-      {/* Table */}
+      {/* Content */}
       {isLoading ? (
         <div className="h-64 flex items-center justify-center text-slate-400">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-emerald-500 mr-2" />
@@ -179,73 +175,141 @@ export default function AdminPrograms() {
           <p>No programs created yet.</p>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-sm">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-[#0d1e43] uppercase tracking-wider">
-                <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">Description</th>
-                <th className="px-6 py-4">Voting Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-sm">
-              {programs.map((program) => (
-                <tr key={program.id} className="hover:bg-slate-50/50 transition">
-                  <td className="px-6 py-4 font-semibold text-[#0d1e43]">{program.name}</td>
-                  <td className="px-6 py-4 text-slate-500 max-w-xs truncate">
-                    {program.description || "-"}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <Switch.Root
-                        checked={program.is_active}
-                        onCheckedChange={(checked) => handleToggle(program, checked)}
-                        disabled={toggleMutation.isPending}
-                        className="w-11 h-6 rounded-full transition data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-slate-300"
-                      >
-                        <Switch.Thumb className="block w-5 h-5 bg-white rounded-full shadow transition-transform translate-x-0 data-[state=checked]:translate-x-5" />
-                      </Switch.Root>
-                      <span className="text-xs font-bold text-slate-600">
-                        {program.is_active ? "Voting On" : "Voting Off"}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="inline-flex items-center gap-2">
-                      <button
-                        onClick={() =>
-                          navigate({
-                            to: "/admin/programs/$programId/view",
-                            params: { programId: program.id },
-                          })
-                        }
-                        className="p-2 text-slate-500 hover:text-emerald-500 hover:bg-slate-100 rounded-lg transition"
-                        title="View program"
-                      >
-                        <FiExternalLink className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => openShareModal(program)}
-                        className="p-2 text-slate-500 hover:text-blue-500 hover:bg-slate-100 rounded-lg transition"
-                        title="Share join link"
-                      >
-                        <FiShare2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => openDeleteModal(program)}
-                        className="p-2 text-slate-500 hover:text-red-500 hover:bg-slate-100 rounded-lg transition"
-                        title="Delete program"
-                      >
-                        <FiTrash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+        <>
+          {/* Desktop Table — hidden on mobile */}
+          <div className="hidden md:block bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-sm">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-[#0d1e43] uppercase tracking-wider">
+                  <th className="px-6 py-4">Name</th>
+                  <th className="px-6 py-4">Description</th>
+                  <th className="px-6 py-4">Voting Status</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-sm">
+                {programs.map((program) => (
+                  <tr key={program.id} className="hover:bg-slate-50/50 transition">
+                    <td className="px-6 py-4 font-semibold text-[#0d1e43]">{program.name}</td>
+                    <td className="px-6 py-4 text-slate-500 max-w-xs truncate">
+                      {program.description || "-"}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <Switch.Root
+                          checked={program.is_active}
+                          onCheckedChange={(checked) => handleToggle(program, checked)}
+                          disabled={toggleMutation.isPending}
+                          className="w-11 h-6 rounded-full transition data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-slate-300"
+                        >
+                          <Switch.Thumb className="block w-5 h-5 bg-white rounded-full shadow transition-transform translate-x-0 data-[state=checked]:translate-x-5" />
+                        </Switch.Root>
+                        <span className="text-xs font-bold text-slate-600">
+                          {program.is_active ? "Voting On" : "Voting Off"}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="inline-flex items-center gap-2">
+                        <button
+                          onClick={() =>
+                            navigate({
+                              to: "/admin/programs/$programId/view",
+                              params: { programId: program.id },
+                            })
+                          }
+                          className="p-2 text-slate-500 hover:text-emerald-500 hover:bg-slate-100 rounded-lg transition"
+                          title="View program"
+                        >
+                          <FiExternalLink className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => openShareModal(program)}
+                          className="p-2 text-slate-500 hover:text-blue-500 hover:bg-slate-100 rounded-lg transition"
+                          title="Share join link"
+                        >
+                          <FiShare2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => openDeleteModal(program)}
+                          className="p-2 text-slate-500 hover:text-red-500 hover:bg-slate-100 rounded-lg transition"
+                          title="Delete program"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards — shown only on mobile */}
+          <div className="md:hidden space-y-3">
+            {programs.map((program) => (
+              <div
+                key={program.id}
+                className="bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm space-y-3"
+              >
+                {/* Name + description */}
+                <div>
+                  <p className="font-semibold text-[#0d1e43]">{program.name}</p>
+                  {program.description && (
+                    <p className="text-sm text-slate-500 mt-0.5 line-clamp-2">
+                      {program.description}
+                    </p>
+                  )}
+                </div>
+
+                {/* Voting toggle */}
+                <div className="flex items-center gap-2">
+                  <Switch.Root
+                    checked={program.is_active}
+                    onCheckedChange={(checked) => handleToggle(program, checked)}
+                    disabled={toggleMutation.isPending}
+                    className="w-11 h-6 rounded-full transition data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-slate-300"
+                  >
+                    <Switch.Thumb className="block w-5 h-5 bg-white rounded-full shadow transition-transform translate-x-0 data-[state=checked]:translate-x-5" />
+                  </Switch.Root>
+                  <span className="text-xs font-bold text-slate-600">
+                    {program.is_active ? "Voting On" : "Voting Off"}
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+                  <button
+                    onClick={() =>
+                      navigate({
+                        to: "/admin/programs/$programId/view",
+                        params: { programId: program.id },
+                      })
+                    }
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-slate-600 hover:text-emerald-500 hover:bg-slate-50 rounded-lg transition"
+                  >
+                    <FiExternalLink className="w-4 h-4" />
+                    View
+                  </button>
+                  <button
+                    onClick={() => openShareModal(program)}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-slate-600 hover:text-blue-500 hover:bg-slate-50 rounded-lg transition"
+                  >
+                    <FiShare2 className="w-4 h-4" />
+                    Share
+                  </button>
+                  <button
+                    onClick={() => openDeleteModal(program)}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-slate-600 hover:text-red-500 hover:bg-slate-50 rounded-lg transition"
+                  >
+                    <FiTrash2 className="w-4 h-4" />
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Duration Modal */}

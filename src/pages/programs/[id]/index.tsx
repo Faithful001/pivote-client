@@ -129,7 +129,9 @@ export default function ProgramDashboard() {
               </h4>
             </span>
           )}
-          <h1 className="text-3xl font-bold text-[#0d1e43] mb-1">{program.name} Dashboard</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#0d1e43] mb-1">
+            {program.name} Dashboard
+          </h1>
           <p className="text-slate-500 text-sm">
             {program.description || "Welcome back to Pivote"}
           </p>

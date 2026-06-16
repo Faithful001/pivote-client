@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-// import { useMe } from "../../api/auth";
 import {
   FiGrid,
   FiCheckSquare,
@@ -8,6 +7,8 @@ import {
   FiBookOpen,
   FiSettings,
   FiLogOut,
+  FiMenu,
+  FiX,
 } from "react-icons/fi";
 import { toast } from "sonner";
 
@@ -16,9 +17,14 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  // const { data: user, isLoading } = useMe();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -37,64 +43,94 @@ export default function Layout({ children }: LayoutProps) {
     { label: "Settings", path: "/settings", icon: FiSettings },
   ];
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-300">
-  //       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-emerald-500"></div>
-  //     </div>
-  //   );
-  // }
+  const Sidebar = () => (
+    <aside className="w-64 bg-[#0d1e43] text-slate-100 flex flex-col justify-between h-full">
+      <div className="flex flex-col">
+        {/* Logo */}
+        <div className="py-4 border-b border-white/5 px-6 flex items-center justify-between">
+          <div className="flex items-center gap-2 font-bold text-lg tracking-wider text-emerald-400">
+            <FiCheckSquare className="w-5 h-5" />
+            PIVOTE
+          </div>
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="md:hidden text-slate-400 hover:text-white transition"
+          >
+            <FiX className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Navigation Links */}
+        <nav className="mt-8 px-4 space-y-2">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.label}
+                to={item.path}
+                className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition duration-200 ${
+                  isActive
+                    ? "bg-emerald-500 text-white font-semibold shadow-lg shadow-emerald-500/10"
+                    : "text-slate-300 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Logout area */}
+      <div className="p-4 border-t border-white/5">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition duration-200"
+        >
+          <FiLogOut className="w-5 h-5" />
+          Logout
+        </button>
+      </div>
+    </aside>
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
-      {/* Sidebar: Deep Navy matching screenshot */}
-      <aside className="w-64 bg-[#0d1e43] text-slate-100 flex flex-col justify-between shrink-0 shadow-xl fixed h-screen z-10">
-        <div className="flex flex-col">
-          {/* Logo Brand area with Switcher */}
-          <div className="py-4 border-b border-white/5 px-6 flex flex-col justify-center gap-1.5 relative">
-            <div className="flex items-center gap-2 font-bold text-lg tracking-wider text-emerald-400">
-              <FiCheckSquare className="w-5 h-5" />
-              PIVOTE
-            </div>
+      {/* Desktop Sidebar */}
+      <div className="hidden md:flex fixed h-screen w-64 z-10 shadow-xl">
+        <Sidebar />
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div className="md:hidden fixed inset-0 z-40 flex">
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-black/50" onClick={() => setIsSidebarOpen(false)} />
+          {/* Drawer */}
+          <div className="relative z-50 w-64 h-full shadow-xl">
+            <Sidebar />
           </div>
-
-          {/* Navigation Links */}
-          <nav className="mt-8 px-4 space-y-2">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.label}
-                  to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition duration-200 ${
-                    isActive
-                      ? "bg-emerald-500 text-white font-semibold shadow-lg shadow-emerald-500/10"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
         </div>
-
-        {/* Logout area */}
-        <div className="p-4 border-t border-white/5">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition duration-200"
-          >
-            <FiLogOut className="w-5 h-5" />
-            Logout
-          </button>
-        </div>
-      </aside>
+      )}
 
       {/* Main Content Area */}
-      <main className="flex-1 pl-64 bg-[#f8fafc]">
-        <div className="p-10 max-w-7xl mx-auto">{children}</div>
+      <main className="flex-1 md:pl-64 bg-[#f8fafc] min-h-screen">
+        {/* Mobile top bar */}
+        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0d1e43] shadow">
+          <div className="flex items-center gap-2 font-bold text-lg tracking-wider text-emerald-400">
+            <FiCheckSquare className="w-5 h-5" />
+            PIVOTE
+          </div>
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="text-slate-300 hover:text-white transition"
+          >
+            <FiMenu className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="p-4 md:p-10 max-w-7xl mx-auto">{children}</div>
       </main>
     </div>
   );
