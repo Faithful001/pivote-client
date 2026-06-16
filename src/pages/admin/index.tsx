@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMe } from "../../api/auth";
-import { usePrograms, useRequestJoinLink } from "../../api/program";
+import { useAdminPrograms, useRequestJoinLink } from "../../api/program";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
@@ -16,7 +16,7 @@ import {
 
 export default function AdminDashboard() {
   const { data: user } = useMe();
-  const { data: programs, isLoading: loadingPrograms } = usePrograms();
+  const { data: programs, isLoading: loadingPrograms } = useAdminPrograms();
   const requestLinkMutation = useRequestJoinLink();
 
   // "Get Join Link" modal state

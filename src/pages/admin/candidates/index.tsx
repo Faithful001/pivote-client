@@ -5,13 +5,13 @@ import {
   useUpdateCandidate,
   useDeleteCandidate,
 } from "../../../api/candidate";
-import { usePrograms } from "../../../api/program";
+import { useAdminPrograms } from "../../../api/program";
 import { toast } from "sonner";
 import { FiPlus, FiEdit2, FiTrash2, FiInbox, FiX } from "react-icons/fi";
 
 export default function AdminCandidates() {
   const { data: candidates, isLoading: loadingCandidates } = useCandidates();
-  const { data: programs, isLoading: loadingPrograms } = usePrograms();
+  const { data: programs, isLoading: loadingPrograms } = useAdminPrograms();
   const createMutation = useCreateCandidate();
   const updateMutation = useUpdateCandidate();
   const deleteMutation = useDeleteCandidate();

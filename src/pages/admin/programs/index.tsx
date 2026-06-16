@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  usePrograms,
+  useAdminPrograms,
   useDeleteProgram,
   useToggleProgram,
   type Program,
@@ -29,7 +29,7 @@ function validateDuration(days: number, hours: number, minutes: number): string 
 }
 
 export default function AdminPrograms() {
-  const { data: programs, isLoading } = usePrograms();
+  const { data: programs, isLoading } = useAdminPrograms();
   const deleteMutation = useDeleteProgram();
   const toggleMutation = useToggleProgram();
   const navigate = useNavigate();

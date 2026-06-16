@@ -24,12 +24,23 @@ export interface Program {
   updated_at: string;
 }
 
-export const usePrograms = () => {
+export const useAdminPrograms = () => {
   const workspaceId = localStorage.getItem("workspace_id");
   return useQuery<Program[], Error>({
     queryKey: ["programs", workspaceId],
     queryFn: async () => {
       const url = workspaceId ? `/programs?workspace_id=${workspaceId}` : "/programs";
+      const response = await apiClient.get<ApiResponse<Program[]>>(url);
+      return response.data.data;
+    },
+  });
+};
+
+export const usePrograms = () => {
+  return useQuery<Program[], Error>({
+    queryKey: ["programs"],
+    queryFn: async () => {
+      const url = "/programs";
       const response = await apiClient.get<ApiResponse<Program[]>>(url);
       return response.data.data;
     },

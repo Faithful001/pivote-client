@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useMe } from "../../../api/auth";
-import { usePrograms } from "../../../api/program";
+import { useAdminPrograms } from "../../../api/program";
 import { useCandidatesByProgram } from "../../../api/candidate";
 import { useProgramVotes, useToggleVote } from "../../../api/vote";
 import { toast } from "sonner";
@@ -8,7 +8,7 @@ import { FiCheck, FiInbox, FiLock } from "react-icons/fi";
 
 export default function AdminVote() {
   const { data: user } = useMe();
-  const { data: programs, isLoading: loadingPrograms } = usePrograms();
+  const { data: programs, isLoading: loadingPrograms } = useAdminPrograms();
   const [selectedProgramId, setSelectedProgramId] = useState<string>("");
 
   const joinedPrograms = React.useMemo(() => {
