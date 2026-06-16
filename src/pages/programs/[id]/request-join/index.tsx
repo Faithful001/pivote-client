@@ -3,6 +3,7 @@ import { useSearch, useParams } from "@tanstack/react-router";
 import { useRequestJoinProgram } from "../../../../api/program";
 import { FiCheckSquare } from "react-icons/fi";
 import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 
 export default function RequestJoinProgram() {
   const [email, setEmail] = useState("");

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { useForgotPassword } from "../../../api/auth";
+import { useAdminForgotPassword } from "../../../api/auth";
 import { toast } from "sonner";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { FiCheckSquare } from "react-icons/fi";
 
 export default function AdminForgotPassword() {
   const [email, setEmail] = useState("");
-  const forgotPasswordMutation = useForgotPassword();
+  const forgotPasswordMutation = useAdminForgotPassword();
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {

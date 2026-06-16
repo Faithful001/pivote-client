@@ -1,16 +1,42 @@
 import React, { useState } from "react";
-import { useLogin } from "../../../api/auth";
+import { useAdminLogin } from "../../../api/auth";
 import { toast } from "sonner";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { FiCheckSquare, FiEye, FiEyeOff } from "react-icons/fi";
+import { useSendOtp } from "../../../api/otp";
 
 export default function AdminLogin() {
   const search = useSearch({ strict: false }) as Record<string, string>;
   const [email, setEmail] = useState(search?.email || "");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const loginMutation = useLogin();
+  const loginMutation = useAdminLogin();
+  const sendOtpMutation = useSendOtp();
   const navigate = useNavigate();
+
+  const handleResendOtp = () => {
+    if (!email) {
+      toast.error("Email address is required to resend OTP");
+      return;
+    }
+
+    sendOtpMutation.mutate(
+      { email, purpose: "verify_account" },
+      {
+        onSuccess: (data) => {
+          if (data.success) {
+            toast.success("OTP resent! Check your email.");
+          } else {
+            toast.error(data.message || "Failed to resend OTP");
+          }
+        },
+        onError: (err: any) => {
+          const errMsg = err.response?.data?.message || err.message || "An error occurred";
+          toast.error(errMsg);
+        },
+      }
+    );
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,8 +84,13 @@ export default function AdminLogin() {
           }
         },
         onError: (err: any) => {
-          const errMsg = err.response?.data?.message || err.message || "An error occurred";
+          const error = err.response?.data?.message || err.message;
+          const errMsg = error || "An error occurred";
           toast.error(errMsg);
+          if (error === "user not verified") {
+            handleResendOtp();
+            navigate({ to: "/admin/verify", search: { email: email } });
+          }
         },
       }
     );

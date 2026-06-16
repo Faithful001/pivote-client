@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { useResetPassword } from "../../../api/auth";
+import React, { useState, useEffect } from "react";
+import { useAdminResetPassword } from "../../../api/auth";
 import { toast } from "sonner";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { FiCheckSquare, FiEye, FiEyeOff } from "react-icons/fi";
+import { useSendOtp } from "../../../api/otp";
 
 export default function AdminResetPassword() {
   const search = useSearch({ strict: false }) as Record<string, string>;
@@ -12,9 +13,17 @@ export default function AdminResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
 
-  const resetPasswordMutation = useResetPassword();
+  const resetPasswordMutation = useAdminResetPassword();
+  const sendOtpMutation = useSendOtp();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +52,31 @@ export default function AdminResetPassword() {
             navigate({ to: "/admin/login" });
           } else {
             toast.error(data.message || "Failed to reset password");
+          }
+        },
+        onError: (err: any) => {
+          const errMsg = err.response?.data?.message || err.message || "An error occurred";
+          toast.error(errMsg);
+        },
+      }
+    );
+  };
+
+  const handleResendOtp = () => {
+    if (!email) {
+      toast.error("Email address is required to resend OTP");
+      return;
+    }
+
+    sendOtpMutation.mutate(
+      { email, purpose: "reset_pwd" },
+      {
+        onSuccess: (data) => {
+          if (data.success) {
+            toast.success("OTP resent! Check your email.");
+            setCooldown(30);
+          } else {
+            toast.error(data.message || "Failed to resend OTP");
           }
         },
         onError: (err: any) => {
@@ -93,9 +127,23 @@ export default function AdminResetPassword() {
 
           {/* OTP */}
           <div className="space-y-2">
-            <label className="block text-[14px] font-semibold text-[#0d1e43] text-left">
-              4-Digit OTP Code
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-[14px] font-semibold text-[#0d1e43] text-left">
+                4-Digit OTP Code
+              </label>
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={sendOtpMutation.isPending || cooldown > 0}
+                className="text-[13px] text-[#10b981] hover:text-emerald-600 font-semibold hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline transition"
+              >
+                {sendOtpMutation.isPending
+                  ? "Sending..."
+                  : cooldown > 0
+                    ? `Resend in ${cooldown}s`
+                    : "Resend OTP"}
+              </button>
+            </div>
             <input
               type="text"
               value={otp}

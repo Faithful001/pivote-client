@@ -12,7 +12,7 @@ import LandingPage from "./pages/landing";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Verify from "./pages/verify";
-import Dashboard from "./pages";
+import Dashboard from "./pages/dashboard";
 import Vote from "./pages/vote";
 import Results from "./pages/results";
 import Guidelines from "./pages/guidelines";

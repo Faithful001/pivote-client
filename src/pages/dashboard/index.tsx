@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useMe } from "../api/auth";
-import { usePrograms, useRequestJoinLink } from "../api/program";
+import { useMe } from "../../api/auth";
+import { usePrograms, useRequestJoinLink } from "../../api/program";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {

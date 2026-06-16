@@ -60,6 +60,22 @@ export const useLogin = () => {
   });
 };
 
+// Admin login mutation
+export const useAdminLogin = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (credentials: Record<string, string>) => {
+      const response = await apiClient.post<AuthResponse>("/auth/admin/login", credentials);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      console.log("login data", data);
+      localStorage.setItem("token", data.data.token);
+      queryClient.setQueryData(["me"], data.data.user);
+    },
+  });
+};
+
 // Register mutation
 export const useRegister = () => {
   return useMutation({
@@ -80,12 +96,24 @@ export const useAdminRegister = () => {
   });
 };
 
-
 // Verify account OTP mutation
 export const useVerifyAccount = () => {
   return useMutation({
     mutationFn: async (verifyData: { email: string; otp: string }) => {
       const response = await apiClient.post<ApiResponse<null>>("/auth/verify-account", verifyData);
+      return response.data;
+    },
+  });
+};
+
+// Admin Verify account OTP mutation
+export const useAdminVerifyAccount = () => {
+  return useMutation({
+    mutationFn: async (verifyData: { email: string; otp: string }) => {
+      const response = await apiClient.post<ApiResponse<null>>(
+        "/auth/admin/verify-account",
+        verifyData
+      );
       return response.data;
     },
   });
@@ -116,11 +144,37 @@ export const useForgotPassword = () => {
   });
 };
 
+// Forgot password mutation
+export const useAdminForgotPassword = () => {
+  return useMutation({
+    mutationFn: async (payload: { email: string }) => {
+      const response = await apiClient.post<ApiResponse<null>>(
+        "/auth/admin/forgot-password",
+        payload
+      );
+      return response.data;
+    },
+  });
+};
+
 // Reset password mutation
 export const useResetPassword = () => {
   return useMutation({
     mutationFn: async (payload: Record<string, string>) => {
       const response = await apiClient.post<ApiResponse<null>>("/auth/reset-password", payload);
+      return response.data;
+    },
+  });
+};
+
+// Admin Reset password mutation
+export const useAdminResetPassword = () => {
+  return useMutation({
+    mutationFn: async (payload: Record<string, string>) => {
+      const response = await apiClient.post<ApiResponse<null>>(
+        "/auth/admin/reset-password",
+        payload
+      );
       return response.data;
     },
   });
