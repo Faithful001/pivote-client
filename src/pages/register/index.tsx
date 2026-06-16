@@ -17,6 +17,8 @@ export default function Register() {
     email?: string;
     program_id?: string;
     program_name?: string;
+    workspace_id?: string;
+    workspace_name?: string;
   };
 
   // pre-fill email if it came from the invite link
@@ -44,10 +46,10 @@ export default function Register() {
               to: "/verify",
               search: {
                 email,
-                ...(search.program_id && {
-                  program_id: search.program_id,
-                  program_name: search.program_name,
-                }),
+                workspace_id: search.workspace_id ?? undefined,
+                workspace_name: search.workspace_name ?? undefined,
+                program_id: search.program_id ?? undefined,
+                program_name: search.program_name ?? undefined,
               },
             });
           } else {

@@ -91,12 +91,26 @@ const registerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/register",
   component: Register,
+  validateSearch: (search: Record<string, unknown>) => ({
+    email: typeof search.email === "string" ? search.email : undefined,
+    workspace_name: typeof search.workspace_name === "string" ? search.workspace_name : undefined,
+    program_name: typeof search.program_name === "string" ? search.program_name : undefined,
+    workspace_id: typeof search.workspace_id === "string" ? search.workspace_id : undefined,
+    program_id: typeof search.program_id === "string" ? search.program_id : undefined,
+  }),
 });
 
 const verifyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/verify",
   component: Verify,
+  validateSearch: (search: Record<string, unknown>) => ({
+    email: typeof search.email === "string" ? search.email : undefined,
+    workspace_name: typeof search.workspace_name === "string" ? search.workspace_name : undefined,
+    program_name: typeof search.program_name === "string" ? search.program_name : undefined,
+    workspace_id: typeof search.workspace_id === "string" ? search.workspace_id : undefined,
+    program_id: typeof search.program_id === "string" ? search.program_id : undefined,
+  }),
 });
 
 const requestJoinProgramRoute = createRoute({
