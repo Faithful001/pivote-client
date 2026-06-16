@@ -46,10 +46,16 @@ export default function Register() {
               to: "/verify",
               search: {
                 email,
-                workspace_id: search.workspace_id ?? undefined,
-                workspace_name: search.workspace_name ?? undefined,
-                program_id: search.program_id ?? undefined,
-                program_name: search.program_name ?? undefined,
+                ...(search.workspace_id &&
+                  search.workspace_name && {
+                    workspace_id: search.workspace_id,
+                    workspace_name: search.workspace_name,
+                  }),
+                ...(search.program_id &&
+                  search.program_name && {
+                    program_id: search.program_id,
+                    program_name: search.program_name,
+                  }),
               },
             });
           } else {
