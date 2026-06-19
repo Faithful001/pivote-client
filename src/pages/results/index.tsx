@@ -2,11 +2,23 @@ import React, { useState } from "react";
 import { usePrograms } from "../../api/program";
 import { useCandidatesByProgram } from "../../api/candidate";
 import { useProgramVotes } from "../../api/vote";
+import { useSocket } from "../../contexts/useSocket";
 import { FiInbox, FiAward } from "react-icons/fi";
 
 export default function Results() {
   const { data: programs, isLoading: loadingPrograms } = usePrograms();
   const [selectedProgramId, setSelectedProgramId] = useState<string>("");
+  const { joinProgram } = useSocket();
+
+  const activeProgram = React.useMemo(() => {
+    return programs?.find((p) => p.id === selectedProgramId);
+  }, [programs, selectedProgramId]);
+
+  React.useEffect(() => {
+    if (selectedProgramId && activeProgram?.workspace_id) {
+      joinProgram(selectedProgramId, activeProgram.workspace_id);
+    }
+  }, [selectedProgramId, activeProgram?.workspace_id, joinProgram]);
 
   const { data: candidates, isLoading: loadingCandidates } =
     useCandidatesByProgram(selectedProgramId);

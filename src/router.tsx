@@ -33,7 +33,7 @@ import AdminResetPassword from "./pages/admin/reset-password";
 import AdminPrograms from "./pages/admin/programs";
 import AdminCandidates from "./pages/admin/candidates";
 import AdminCreateProgram from "./pages/admin/programs/create";
-import AdminViewProgram from "./pages/admin/programs/[id]/view";
+import AdminViewProgram from "./pages/admin/programs/[id]";
 
 // Guards & Layout
 import Layout from "./components/user/Layout";
@@ -42,7 +42,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AdminDashboard from "./pages/admin";
 import AdminSettings from "./pages/admin/settings";
 import AdminGuidelines from "./pages/admin/guidelines";
-import AdminVote from "./pages/admin/vote";
+import AdminProgramDashboard from "./pages/admin/programs/[id]";
 
 // ─────────────────────────────────────────────
 // 1. Root & Index Routes
@@ -291,16 +291,16 @@ const adminCreateProgramRoute = createRoute({
   component: AdminCreateProgram,
 });
 
+const adminProgramDashboardRoute = createRoute({
+  getParentRoute: () => adminLayout,
+  path: "/admin/programs/$programId",
+  component: AdminProgramDashboard,
+});
+
 const adminViewProgramRoute = createRoute({
   getParentRoute: () => adminLayout,
   path: "/admin/programs/$programId/view",
   component: AdminViewProgram,
-});
-
-const adminVoteRoute = createRoute({
-  getParentRoute: () => adminLayout,
-  path: "/admin/vote",
-  component: AdminVote,
 });
 
 const adminGuidelinesRoute = createRoute({
@@ -359,10 +359,10 @@ const routeTree = rootRoute.addChildren([
   adminLayout.addChildren([
     adminDashboardRoute,
     adminCreateProgramRoute,
+    adminProgramDashboardRoute,
     adminViewProgramRoute,
     adminProgramsRoute,
     adminGuidelinesRoute,
-    adminVoteRoute,
     adminCandidatesRoute,
     adminSettingsRoute,
   ]),

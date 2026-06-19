@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "@tanstack/react-router";
-import { useProgram } from "../../../api/program";
-import { useCandidatesByProgram } from "../../../api/candidate";
-import { useProgramVotes } from "../../../api/vote";
-import { useSocket } from "../../../contexts/useSocket";
-import { API_BASE_URL } from "../../../api/client";
-import { FiChevronLeft, FiCheckSquare } from "react-icons/fi";
+import { useProgram } from "../../../../api/program";
+import { useCandidatesByProgram } from "../../../../api/candidate";
+import { useProgramVotes } from "../../../../api/vote";
+import { useSocket } from "../../../../contexts/useSocket";
+import { API_BASE_URL } from "../../../../api/client";
+import { FiChevronLeft } from "react-icons/fi";
 
-export default function ProgramDashboard() {
+export default function AdminProgramDashboard() {
   const { programId } = useParams({ strict: false }) as { programId: string };
   const { joinProgram } = useSocket();
 
@@ -184,15 +184,6 @@ export default function ProgramDashboard() {
             <h2 className="text-xl font-bold text-[#0d1e43]">Live Results</h2>
             <p className="text-slate-400 text-xs mt-1">See the current results of the election</p>
           </div>
-
-          {program.is_active && (
-            <Link
-              to="/vote"
-              className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-xl text-sm transition flex items-center gap-2 shadow-sm"
-            >
-              <FiCheckSquare className="w-4 h-4" /> Vote Now
-            </Link>
-          )}
         </div>
 
         {loadingCandidates || loadingVotes ? (

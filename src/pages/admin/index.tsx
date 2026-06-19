@@ -164,7 +164,7 @@ export default function AdminDashboard() {
                   <div className="space-y-3">
                     {isJoined ? (
                       <Link
-                        to="/programs/$programId"
+                        to="/admin/programs/$programId"
                         params={{ programId: program.id }}
                         className="w-full bg-[#0d1e43] hover:bg-slate-900 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-sm"
                       >

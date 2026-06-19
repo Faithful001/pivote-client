@@ -3,6 +3,7 @@ import { useMe } from "../../api/auth";
 import { usePrograms } from "../../api/program";
 import { useCandidatesByProgram } from "../../api/candidate";
 import { useProgramVotes, useToggleVote } from "../../api/vote";
+import { useSocket } from "../../contexts/useSocket";
 import { toast } from "sonner";
 import { FiCheck, FiInbox, FiLock } from "react-icons/fi";
 
@@ -10,6 +11,7 @@ export default function Vote() {
   const { data: user } = useMe();
   const { data: programs, isLoading: loadingPrograms } = usePrograms();
   const [selectedProgramId, setSelectedProgramId] = useState<string>("");
+  const { joinProgram } = useSocket();
 
   const joinedPrograms = React.useMemo(() => {
     if (!programs) return [];
@@ -20,6 +22,13 @@ export default function Vote() {
   const activeProgram = React.useMemo(() => {
     return joinedPrograms.find((p) => p.id === selectedProgramId);
   }, [joinedPrograms, selectedProgramId]);
+
+  // Join the selected program socket room for real-time updates
+  React.useEffect(() => {
+    if (selectedProgramId && activeProgram?.workspace_id) {
+      joinProgram(selectedProgramId, activeProgram.workspace_id);
+    }
+  }, [selectedProgramId, activeProgram?.workspace_id, joinProgram]);
 
   // Fetch candidates and votes of selected program
   const { data: candidates, isLoading: loadingCandidates } =
