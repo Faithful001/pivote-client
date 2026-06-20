@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import io from "socket.io-client";
 import { API_BASE_URL } from "../api/client";
 import { useQueryClient, QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface SocketContextType {
-  socket: Socket | null;
+  socket: SocketIOClient.Socket | null;
   isConnected: boolean;
   joinProgram: (programId: string, workspaceId: string) => void;
 }
@@ -18,9 +18,9 @@ const SocketContext = createContext<SocketContextType>({
 
 export const useSocket = () => useContext(SocketContext);
 
-let sharedSocket: Socket | null = null;
+let sharedSocket: SocketIOClient.Socket | null = null;
 
-function getSocket(): Socket {
+function getSocket(): SocketIOClient.Socket {
   if (!sharedSocket) {
     const socketUrl = API_BASE_URL.replace("/api/v1", "");
     sharedSocket = io(socketUrl, {
@@ -33,7 +33,7 @@ function getSocket(): Socket {
 
 let listenersBound = false;
 
-function bindSocketListeners(socket: Socket, queryClient: QueryClient) {
+function bindSocketListeners(socket: SocketIOClient.Socket, queryClient: QueryClient) {
   if (listenersBound) return;
   listenersBound = true;
 
@@ -85,8 +85,8 @@ function bindSocketListeners(socket: Socket, queryClient: QueryClient) {
 }
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const socketRef = useRef<Socket>(getSocket());
-  const [socket, setSocket] = useState<Socket | null>(socketRef.current);
+  const socketRef = useRef<SocketIOClient.Socket>(getSocket());
+  const [socket, setSocket] = useState<SocketIOClient.Socket | null>(socketRef.current);
   const [isConnected, setIsConnected] = useState(socketRef.current.connected);
   const queryClient = useQueryClient();
 

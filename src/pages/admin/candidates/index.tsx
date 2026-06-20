@@ -127,8 +127,8 @@ export default function AdminCandidates() {
           <p>No candidates nominated yet.</p>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-sm">
-          <table className="w-full text-left border-collapse">
+        <div className="bg-white border border-slate-200/60 rounded-2xl overflow-x-auto shadow-sm">
+          <table className="w-full min-w-[500px] text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-[#0d1e43] uppercase tracking-wider">
                 <th className="px-6 py-4">Candidate Name</th>

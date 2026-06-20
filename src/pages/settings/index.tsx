@@ -82,7 +82,7 @@ export default function Settings() {
           <button
             type="submit"
             disabled={updateUserMutation.isPending}
-            className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition flex items-center gap-2 shadow-md shadow-emerald-500/10"
+            className="text-sm bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition flex items-center gap-2 shadow-md shadow-emerald-500/10"
           >
             <FiSave className="w-5 h-5" />
             {updateUserMutation.isPending ? "Saving..." : "Save Changes"}

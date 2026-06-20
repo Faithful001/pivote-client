@@ -103,19 +103,29 @@ export default function Layout({ children }: LayoutProps) {
       </div>
 
       {/* Mobile Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div className="md:hidden fixed inset-0 z-40 flex">
-          {/* Backdrop */}
-          <div className="fixed inset-0 bg-black/50" onClick={() => setIsSidebarOpen(false)} />
-          {/* Drawer */}
-          <div className="relative z-50 w-64 h-full shadow-xl">
-            <Sidebar />
-          </div>
+      <div
+        className={`md:hidden fixed inset-0 z-40 flex ${
+          isSidebarOpen ? "pointer-events-auto" : "pointer-events-none"
+        }`}
+      >
+        {/* Backdrop fades in/out */}
+        <div
+          className={`fixed inset-0 bg-black/50 transition-opacity duration-300 ${
+            isSidebarOpen ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={() => setIsSidebarOpen(false)}
+        />
+        {/* Drawer slides in/out */}
+        <div
+          className={`relative z-50 w-64 h-full shadow-xl transform transition-transform duration-300 ease-in-out ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <Sidebar />
         </div>
-      )}
+      </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 md:pl-64 bg-[#f8fafc] min-h-screen">
+      <main className="flex-1 min-w-0 md:pl-64 bg-[#f8fafc] min-h-screen">
         {/* Mobile top bar */}
         <div className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0d1e43] shadow">
           <div className="flex items-center gap-2 font-bold text-lg tracking-wider text-emerald-400">
@@ -130,7 +140,7 @@ export default function Layout({ children }: LayoutProps) {
           </button>
         </div>
 
-        <div className="p-4 md:p-10 max-w-7xl mx-auto">{children}</div>
+        <div className="p-4 md:p-10 max-w-7xl mx-auto min-w-0">{children}</div>
       </main>
     </div>
   );

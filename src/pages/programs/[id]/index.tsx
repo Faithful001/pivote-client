@@ -6,8 +6,10 @@ import { useProgramVotes } from "../../../api/vote";
 import { useSocket } from "../../../contexts/useSocket";
 import { API_BASE_URL } from "../../../api/client";
 import { FiChevronLeft, FiCheckSquare } from "react-icons/fi";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ProgramDashboard() {
+  const queryClient = useQueryClient();
   const { programId } = useParams({ strict: false }) as { programId: string };
   const { joinProgram } = useSocket();
 
@@ -45,6 +47,11 @@ export default function ProgramDashboard() {
       const val = parseInt(event.data, 10);
       if (!isNaN(val)) {
         setTimeLeft(val);
+      }
+      if (val === 0) {
+        queryClient.invalidateQueries({
+          queryKey: ["programs", programId],
+        });
       }
     });
 
@@ -206,56 +213,57 @@ export default function ProgramDashboard() {
           </div>
         ) : (
           /* Horizontal Bar Chart matching the design exactly */
-          <div className="space-y-8 max-w-4xl mx-auto py-4">
-            <div className="space-y-6">
-              {candidates.map((candidate, idx) => {
-                const votes = voteInfo?.votes_by_candidate[candidate.id] || 0;
-                // Calculate percentage based on max vote bound
-                const percentage = Math.min((votes / roundedMax) * 100, 100);
+          <div className="overflow-x-auto w-full pb-4">
+            <div className="min-w-[600px] space-y-8 max-w-4xl mx-auto py-4">
+              <div className="space-y-6">
+                {candidates.map((candidate, idx) => {
+                  const votes = voteInfo?.votes_by_candidate[candidate.id] || 0;
+                  // Calculate percentage based on max vote bound
+                  const percentage = Math.min((votes / roundedMax) * 100, 100);
 
-                // Alternating custom colors matching the screenshot
-                const barColor =
-                  idx === 0
-                    ? "bg-indigo-300" // Light purple/indigo
-                    : idx % 2 === 1
-                      ? "bg-[#0d1e43]" // Dark navy blue
-                      : "bg-blue-800"; // Another dark blue
+                  // Alternating custom colors matching the screenshot
+                  const barColor =
+                    idx === 0
+                      ? "bg-indigo-300" // Light purple/indigo
+                      : idx % 2 === 1
+                        ? "bg-[#0d1e43]" // Dark navy blue
+                        : "bg-blue-800"; // Another dark blue
 
-                return (
-                  <div key={candidate.id} className="flex items-center gap-6">
-                    {/* Candidate Name */}
-                    <span className="w-32 text-right font-medium text-slate-600 truncate">
-                      {candidate.name}
-                    </span>
+                  return (
+                    <div key={candidate.id} className="flex items-center gap-6">
+                      {/* Candidate Name */}
+                      <span className="w-32 text-right font-medium text-slate-600 truncate flex-shrink-0">
+                        {candidate.name}
+                      </span>
 
-                    {/* Bar container */}
-                    <div className="flex-1 bg-slate-100/50 rounded-full h-8 relative border border-slate-100 overflow-hidden">
-                      <div
-                        className={`h-full ${barColor} rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-4`}
-                        style={{ width: `${percentage || 0}%` }}
-                      >
-                        {votes > 0 && (
-                          <span className="text-[10px] font-bold text-white font-mono whitespace-nowrap">
-                            {votes} Votes
-                          </span>
-                        )}
+                      {/* Bar container */}
+                      <div className="flex-1 bg-slate-100/50 rounded-full h-8 relative border border-slate-100 overflow-hidden">
+                        <div
+                          className={`h-full ${barColor} rounded-full transition-all duration-500 ease-out`}
+                          style={{ width: `${percentage || 0}%` }}
+                        />
                       </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
 
-            {/* Grid Line labels matching screenshot scale */}
-            <div className="relative pt-4">
-              <div className="flex justify-between pl-[144px] text-[10px] font-mono text-slate-400 font-medium">
-                {Array.from({ length: 9 }).map((_, i) => {
-                  const val = Math.round((roundedMax / 8) * i);
-                  return <span key={i}>{val}</span>;
+                      {/* Votes count label */}
+                      <span className="w-20 text-left font-bold text-slate-700 font-mono text-sm flex-shrink-0">
+                        {votes} {votes === 1 ? "Vote" : "Votes"}
+                      </span>
+                    </div>
+                  );
                 })}
               </div>
-              {/* Vertical dotted grid lines behind */}
-              <div className="absolute inset-x-0 top-0 h-[2px] bg-slate-100 pl-[144px] flex justify-between" />
+
+              {/* Grid Line labels matching screenshot scale */}
+              <div className="relative pt-4">
+                <div className="flex justify-between pl-[152px] pr-[104px] text-[10px] font-mono text-slate-400 font-medium">
+                  {Array.from({ length: 9 }).map((_, i) => {
+                    const val = Math.round((roundedMax / 8) * i);
+                    return <span key={i}>{val}</span>;
+                  })}
+                </div>
+                {/* Scale line */}
+                <div className="absolute inset-x-0 top-0 h-[2px] bg-slate-100 pl-[152px] pr-[104px] flex justify-between" />
+              </div>
             </div>
           </div>
         )}
