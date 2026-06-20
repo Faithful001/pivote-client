@@ -14,10 +14,13 @@
   --color-navy-800: #2d4764;
   --color-navy-900: #0d1e43;
   --color-emerald-500: #10b981;
+
+  --font-sans: "Inter", sans-serif;
+  --font-heading: "Outfit", sans-serif;
 }
 
 body {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
   background-color: var(--color-slate-50);
   color: var(--color-slate-900);
   -webkit-font-smoothing: antialiased;
@@ -30,5 +33,5 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Outfit", sans-serif;
+  font-family: var(--font-heading);
 }
