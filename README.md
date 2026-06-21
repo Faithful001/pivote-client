@@ -2,7 +2,7 @@
 
 Pivote Client is the frontend application for the Pivote voting platform. It gives participants a place to join voting programs, cast their votes, and watch results update live, while also giving administrators a dedicated interface to create and manage those programs from start to finish.
 
-The name is a loose play on the word "pivot" and the Spanish word for vote, _votar_. It felt like an appropriate name for something that sits at the intersection of decision-making and real-time feedback.
+The name is a blend of "pivot" and "e" for election. Voting is fundamentally about pivoting, and a good election shifts the direction of things. The name felt like a natural fit.
 
 ---
 
@@ -18,20 +18,20 @@ On the administrator side, admins can create and manage workspaces, set up votin
 
 ## Tech Stack
 
-| Concern | Technology |
-|---|---|
-| Language | TypeScript |
-| Framework | React 19 |
-| Build tool | Vite 8 |
-| Routing | TanStack Router v1 |
-| Data fetching | TanStack Query v5 |
-| UI components | Radix UI Themes |
-| Icons | Lucide React, React Icons |
-| HTTP client | Axios |
-| Real-time | Socket.IO Client v2 |
-| Notifications | Sonner |
-| Styling | Tailwind CSS v4 |
-| Linting | ESLint with TypeScript support |
+| Concern       | Technology                     |
+| ------------- | ------------------------------ |
+| Language      | TypeScript                     |
+| Framework     | React 19                       |
+| Build tool    | Vite 8                         |
+| Routing       | TanStack Router v1             |
+| Data fetching | TanStack Query v5              |
+| UI components | Radix UI Themes                |
+| Icons         | Lucide React, React Icons      |
+| HTTP client   | Axios                          |
+| Real-time     | Socket.IO Client v2            |
+| Notifications | Sonner                         |
+| Styling       | Tailwind CSS v4                |
+| Linting       | ESLint with TypeScript support |
 
 ---
 
