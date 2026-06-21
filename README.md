@@ -2,7 +2,7 @@
 
 Pivote Client is the frontend application for the Pivote voting platform. It gives participants a place to join voting programs, cast their votes, and watch results update live, while also giving administrators a dedicated interface to create and manage those programs from start to finish.
 
-The name is a blend of "pivot" and "e" for election. Voting is fundamentally about pivoting, and a good election shifts the direction of things. The name felt like a natural fit.
+The name is a blend of "pivot" and "e" for election. For a system built to collect votes and surface a result, the name just made sense.
 
 ---
 
