@@ -75,12 +75,12 @@ src/
 
 - Node.js 18 or later
 - npm or any compatible package manager
-- A running instance of the [Pivote API](https://github.com/your-username/pivote)
+- A running instance of the [Pivote API](https://github.com/Faithful001/pivote)
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/pivote-client.git
+git clone https://github.com/Faithful001/pivote-client.git
 cd pivote-client
 ```
 
